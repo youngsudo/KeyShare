@@ -23,7 +23,7 @@ struct UserList {   // 通过 Sum 获取全部用户的地址
     address userAddr;
 }
 
-uint256 public Sum = 0; // 所有地址的总数
+uint256 public Sum; // 所有地址的总数
 
 //  mapping映射将地址映射到用户数据结构，这个可以初略理解为一个地址所对应的值有哪些
 mapping(address => UserStruct) public userStruct; // 存储账户个人信息
@@ -52,12 +52,19 @@ function addUser(address _addr,string memory _account, string memory _password, 
     accountMap[_account] = _addr;
     emailMap[_email] = _addr;
 
-    // 将地址添加到数组中
-    userList[Sum] = UserList({
-        index: Sum,     // 考虑使用 num 来代替 index,这样子代表的是元素是第几个,为 0 时代表没有元素
+    // 将地址添加到数组中   索引为 0 时代表的是管理员身份,或者没有元素 
+    if(_addr == admin){
+        userList[0] = UserList({
+            index: 0,    
+            userAddr: _addr
+        });
+    }else{
+        Sum++;  // 地址总数加1
+        userList[Sum] = UserList({
+        index: Sum,  
         userAddr: _addr
     });
-    Sum++;  // 地址总数加1
+    }
 }
 
 //判断用户地址是否存在
