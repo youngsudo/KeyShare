@@ -9,7 +9,7 @@ contract User{
     uint256 Sum; // 所有地址的总数
     address[] adminList; // 管理员地址列表  动态数组
     uint8 public immutable adminNum; // 管理员数量
-    bool AddMyself = false; // 是否已经添加自己到管理员列表
+    bool AddAdministrator = false; // 是否已经添加自己到管理员列表
 
 // 定义一个用户的结构体
 struct UserStruct  {
@@ -38,7 +38,7 @@ mapping(string => address) private emailMap; // 账号与地址的关联
 mapping(uint256 => UserList) private userList; // 通过 []数组下标映射地址来存储所有用户的地址
 mapping(address => AdminStruct) private adminIndex; // 存储管理员在 管理员列表中的 索引(下标)
 mapping(address => string) private symbol;  // 存储助记符
-mapping(string => address) symbolToAddr; // 存储助记符与地址的关联
+mapping(string => address) private symbolToAddr; // 存储助记符与地址的关联
 
 constructor(uint8 _adminNum)  {
     require(_adminNum >= 1,"At least one administrator");
@@ -52,7 +52,7 @@ modifier onlyAdministrator {
 }
 
 modifier onlyAdmin {
-    require(AddMyself, "Administrator,you must add yourself first!");
+    require(AddAdministrator, "Administrator,you must add yourself first!");
     require(isExitUserAddressFunc(msg.sender), "The current admin user address does not exist!"); 
     require(isAdminFunc(msg.sender),"You're not an admin!");    // 判断是否是管理员
  _;
@@ -67,7 +67,8 @@ function addUserFunc(address _addr,string memory _account, string memory _passwo
     // 将地址与账号和邮箱以及助记符关联
     accountMap[_account] = _addr;
     emailMap[_email] = _addr;
-    symbol[_addr] = _symbol;
+    symbol[_addr] = _symbol;    // 将地址与助记符关联
+    symbolToAddr[_symbol] = _addr;  // 将助记符与地址关联
     Sum++;  // 所有地址总数加1
     // 将地址添加到数组中   索引为 0 时代表的是超级管理员身份,或者没有元素 
     if(_addr == administrator){
@@ -125,16 +126,26 @@ function isExitUserEmailFunc(string memory _email) public view returns(bool) {
        return userStructMap[emailMap[_email]].exist;
 }
 
+// 查看自己的助记符
+function getSymbolFunc() public view returns(string memory) {
+    require(isExitUserAddressFunc(msg.sender), "User does not exist!"); // 判断用户是否存在
+    return symbol[msg.sender];
+}
+// 通过助记符查找地址
+function getAddressFunc(string memory _symbol) public view returns(address) {
+    return symbolToAddr[_symbol];
+}
+
 // 管理员查看用户的总数量
 function getSumFunc() public view onlyAdmin returns(uint256) {
     return Sum;
 }
 // 超管必须先将自己先升级为管理员  
 function addMyselfFunc() public onlyAdministrator{
-    require(!AddMyself, "You already add yourself!");
+    require(!AddAdministrator, "You already add yourself!");
     adminList.push(msg.sender) ;
     adminIndex[msg.sender].index = 0; // 超级管理员索引为0
-    AddMyself = true;   // 已经添加自己
+    AddAdministrator = true;   // 已经添加自己
 }
 // 查看所有管理员的地址 onlyAdmin
 function getAdminListFunc() public view onlyAdmin returns(address[] memory) {
@@ -148,7 +159,7 @@ function getUserListFunc(uint256 _index) public view onlyAdmin returns(address) 
 
 // 将用户升级为管理员
 function addAdminFunc(address _addr) public onlyAdministrator {
-    require(AddMyself, "You must add yourself first!");
+    require(AddAdministrator, "You must add yourself first!");
     require(isExitUserAddressFunc(_addr), "User does not exist!");
     require(!isAdminFunc(_addr), "User is already an admin!");
     require(adminList.length < adminNum, "Administrator number is full!");
