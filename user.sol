@@ -187,8 +187,6 @@ function removeAdminFunc(address _addr) public onlyAdministrator {
     }
 }
 
-
-
 // 账号密码管理 
 // 
 // 用户登陆  账号或地址登陆,返回用户账号密码是否正确与 成功时 用户的类型,用于判断是否为管理员
@@ -212,8 +210,7 @@ function loginFunc(address _addr,string memory _account, string memory _password
         return (false,3); // 登陆失败
     }
 }
-
-// // 用户查看自己的信息  
+// 用户查看自己的信息  
 function getMyselfInfoFunc() public view returns(address,string memory,string memory,uint256,uint8) {
     require(isExitUserAddressFunc(msg.sender), "You are not register!"); // 判断用户是否存在
     // require(isLogin, "You are not login!"); // 判断用户是否登陆
