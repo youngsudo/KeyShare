@@ -31,8 +31,8 @@ struct AdminStruct{
     uint8 index;    // 管理员地址在列表中的索引
 }
 //  mapping映射将地址映射到用户数据结构，这个可以初略理解为一个地址所对应的值有哪些
-mapping(address => UserStruct) private userStruct; // 存储账户个人信息
-// userStruct[address].exist = true;    // 判断用户存在
+mapping(address => UserStruct) private userStructMap; // 存储账户个人信息
+// userStructMap[address].exist = true;    // 判断用户存在
 mapping(string => address) private accountMap; // 账号与地址的关联
 mapping(string => address) private emailMap; // 账号与地址的关联
 mapping(uint256 => UserList) private userList; // 通过 []数组下标映射地址来存储所有用户的地址
@@ -72,7 +72,7 @@ function addUserFunc(address _addr,string memory _account, string memory _passwo
     // 将地址添加到数组中   索引为 0 时代表的是超级管理员身份,或者没有元素 
     if(_addr == administrator){
             // 创建一个超级管理员用户
-            userStruct[_addr] =  UserStruct({
+            userStructMap[_addr] =  UserStruct({
                 addr: _addr,
                 account: _account,
                 password: _password,
@@ -87,7 +87,7 @@ function addUserFunc(address _addr,string memory _account, string memory _passwo
             });
     }else{
         // 创建一个新的用户
-        userStruct[_addr] =  UserStruct({
+        userStructMap[_addr] =  UserStruct({
             addr: _addr,
             account: _account,
             password: _password,
@@ -106,30 +106,29 @@ function addUserFunc(address _addr,string memory _account, string memory _passwo
 // 判断用户是否为管理员 0 是administrator 超级管理员; 1 admin 管理员; 2 是普通用户
 function isAdminFunc(address _addr) public view returns (bool) {
     require(isExitUserAddressFunc(_addr), "User does not exist!"); // 判断用户是否存在
-    return userStruct[_addr].usertype <= 1; // 判断用户是否为管理员
+    return userStructMap[_addr].usertype <= 1; // 判断用户是否为管理员
 }
 
 // 判断用户地址是否存在(是否已经注册)
 function isExitUserAddressFunc(address _userAddress) public view returns(bool) {
-       return userStruct[_userAddress].exist;    
+       return userStructMap[_userAddress].exist;    
 }
 
 // 判断 用户账号 是否存在
 function isExitUserAccountFunc(string memory _userAddress) public view returns(bool) {
-    // accountMap => account => userStruct{} => exist
-    return userStruct[accountMap[_userAddress]].exist;
+    // accountMap => account => userStructMap{} => exist
+    return userStructMap[accountMap[_userAddress]].exist;
     
 }
 // 判断 用户邮箱 是否存在
 function isExitUserEmailFunc(string memory _email) public view returns(bool) {
-       return userStruct[emailMap[_email]].exist;
+       return userStructMap[emailMap[_email]].exist;
 }
 
 // 管理员查看用户的总数量
 function getSumFunc() public view onlyAdmin returns(uint256) {
     return Sum;
 }
-
 // 超管必须先将自己先升级为管理员  
 function addMyselfFunc() public onlyAdministrator{
     require(!AddMyself, "You already add yourself!");
@@ -153,7 +152,7 @@ function addAdminFunc(address _addr) public onlyAdministrator {
     require(isExitUserAddressFunc(_addr), "User does not exist!");
     require(!isAdminFunc(_addr), "User is already an admin!");
     require(adminList.length < adminNum, "Administrator number is full!");
-    userStruct[_addr].usertype = 1;
+    userStructMap[_addr].usertype = 1;
     adminList.push(_addr);    // 将管理员添加到数组中
     // 已经修改了管理员数量 (adminList.length +1)
     adminIndex[_addr].index = uint8(adminList.length) - 1; // 管理员索引 = 数组长度 - 1
@@ -163,7 +162,7 @@ function removeAdminFunc(address _addr) public onlyAdministrator {
     require(_addr != administrator, "You are the administrator!");
     require(isExitUserAddressFunc(_addr) == true, "User does not exist!");
     require(isAdminFunc(_addr) == true, "User is not an administrator!");
-    userStruct[_addr].usertype = 2; // 将管理员降级为普通用户
+    userStructMap[_addr].usertype = 2; // 将管理员降级为普通用户
     // 将管理员移除   
     // 当管理员数 = 2 时, 直接将2号管理员移除
     if (adminList.length == 2) {
@@ -182,35 +181,37 @@ function removeAdminFunc(address _addr) public onlyAdministrator {
 // 账号密码管理 
 // 
 // 用户登陆  账号或地址登陆,返回用户账号密码是否正确与 成功时 用户的类型,用于判断是否为管理员
-// 与合约本身无关系, 只是为了方便后台管理
+// 与合约本身无关系, 只是为了方便后台管理,必须传递一个地址
 function loginFunc(address _addr,string memory _account, string memory _password) public view returns(bool,uint8) {
     if (keccak256(abi.encode(_account)) == keccak256(abi.encode(""))){  // 如果传递的账号为空,则表示用地址登陆
         if (isExitUserAddressFunc(_addr)) {
             // 通过地址获取到存储到用户信息的密码与用户输入的密码进行比较
-            if(keccak256(abi.encode(userStruct[_addr].password))== keccak256(abi.encode(_password))){
-                return (true,userStruct[_addr].usertype);    // 登陆成功
+            if(keccak256(abi.encode(userStructMap[_addr].password))== keccak256(abi.encode(_password))){
+                return (true,userStructMap[_addr].usertype);    // 登陆成功
             }
         }        
         return (false,3); // 登陆失败
     }else{
         if (isExitUserAccountFunc(_account)) {
             // 通过账号获取到存储到用户信息的密码与用户输入的密码进行比较
-            if(keccak256(abi.encode(userStruct[accountMap[_account]].password))== keccak256(abi.encode(_password))){
-                return (true,userStruct[_addr].usertype);    // 登陆成功
+            if(keccak256(abi.encode(userStructMap[accountMap[_account]].password))== keccak256(abi.encode(_password))){
+                return (true,userStructMap[_addr].usertype);    // 登陆成功
             }
         }  
         return (false,3); // 登陆失败
     }
 }
 
-// 用户查看自己的信息   // 只能返回三个值?!!!
-function getMyselfInfoFunc() public view returns(address,string memory,uint8) {
+// // 用户查看自己的信息  
+function getMyselfInfoFunc() public view returns(address,string memory,string memory,uint256,uint8) {
     require(isExitUserAddressFunc(msg.sender), "You are not register!"); // 判断用户是否存在
     // require(isLogin, "You are not login!"); // 判断用户是否登陆
     return (
-    userStruct[msg.sender].addr,
-    userStruct[msg.sender].account,
-    userStruct[msg.sender].usertype
+    userStructMap[msg.sender].addr,
+    userStructMap[msg.sender].account,
+    userStructMap[msg.sender].email,
+    userStructMap[msg.sender].time,
+    userStructMap[msg.sender].usertype
     );
 }
 }
