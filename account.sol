@@ -33,7 +33,7 @@ function addAccountClassFunc(string memory _accountClass) public  {
 function isAccountClassFunc(string memory _accountClass) internal view returns(bool){
     if(accountClassListMap[msg.sender].length == 0){return false;}  // 判断分类数组是否为空,为空则肯定不存在
     // return keccak256(abi.encode(accountTypeList[accountClassIndexMap[msg.sender][_accountClass]])) == keccak256(abi.encode(_accountClass));
-    return accountClassIndexMap[msg.sender][_accountClass] != 0;    // 判断分类索引是否为0,为0则肯定不存在
+    return (str(_accountClass,"default") || accountClassIndexMap[msg.sender][_accountClass] != 0);    // 判断分类索引是否为0,为0则不是default就肯定不存在
 }
 
 // 返回所有分类(数组)
@@ -102,30 +102,30 @@ struct KeyStruct{ // 保存的账号和密码
     string password;
 }
 // 通过地址和分类名 获取Key数组
-mapping (address => mapping(string => KeyStruct[])) private keyListMap;
+mapping (address => mapping(string => KeyStruct[])) public keyListMap;
 // 地址 分类名 账号列表(Key) 账号索引
 mapping(address => mapping(string => mapping(string => uint256))) public keyIndexMap; 
 
-// 添加账号
+// 添加账号 不要索引
 function addKeyFunc(string memory _accountClass,string memory _key,string memory _pass) public {
     require(isAccountClassFunc(_accountClass), "Account type does not exist!");
 
     // 判断是否已经存在该账号
-    require(!isKeyFunc(_accountClass,_key), "Account already exists!");
+    require(!isKeyFunc(_accountClass,_key), "Account Key already exists!");
 
     // 添加账号
     keyListMap[msg.sender][_accountClass].push(KeyStruct({
         key:_key,
         password:_pass
     }));
-    // 添加分类下Key索引
-    keyIndexMap[msg.sender][_accountClass][_key] = keyListMap[msg.sender][_accountClass].length - 1;
+    // 添加分类下Key索引,不要索引,使用第几个
+    keyIndexMap[msg.sender][_accountClass][_key] = keyListMap[msg.sender][_accountClass].length;
 }
 
 // 判断账号(Key)是否存在
 function isKeyFunc(string memory _accountClass,string memory _key) public view returns(bool){
     if(keyListMap[msg.sender][_accountClass].length == 0){return false;}  // 判断分类下的Key是否为空,为空则肯定不存在
-    return keyIndexMap[msg.sender][_accountClass][_key] != 0;
+    return keyIndexMap[msg.sender][_accountClass][_key] != 0;   // 判断是否存在该Key
 }
 
 // 返回所有Key(数组)
@@ -133,5 +133,19 @@ function returnClassAll(string memory _accountClass) public view returns (KeyStr
     return keyListMap[msg.sender][_accountClass];
 }
 
+// 删除Key
+function deleteKeyFunc(string memory _accountClass,string memory _key) public {
+    require(isAccountClassFunc(_accountClass), "Account type does not exist!");
+    require(isKeyFunc(_accountClass,_key), "Account key does not exist!");
+    delete keyListMap[msg.sender][_accountClass][keyIndexMap[msg.sender][_accountClass][_key] - 1]; // keyIndexMap是从1开始的
+    delete keyIndexMap[msg.sender][_accountClass][_key];
+}
 
+// 修改Key的密码
+function updateKeyFunc(string memory _accountClass,string memory _key,string memory _pass) public {
+    require(isAccountClassFunc(_accountClass), "Account type does not exist!");
+    require(isKeyFunc(_accountClass,_key), "Account key does not exist!");
+    keyListMap[msg.sender][_accountClass][keyIndexMap[msg.sender][_accountClass][_key] - 1].password = _pass;
+
+}
 }
