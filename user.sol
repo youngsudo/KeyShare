@@ -9,7 +9,6 @@ contract User{
     uint256 Sum; // 所有地址的总数
     address[] adminList; // 管理员地址列表  动态数组
     uint8 public immutable adminNum; // 管理员数量
-    bool AddAdministrator = false; // 是否已经添加自己到管理员列表
 
 // 定义一个用户的结构体
 struct UserStruct  {
@@ -35,8 +34,8 @@ mapping(address => UserStruct) private userStructMap; // 存储账户个人信�
 // userStructMap[address].exist = true;    // 判断用户存在
 mapping(string => address) private accountMap; // 账号与地址的关联
 mapping(string => address) private emailMap; // 账号与地址的关联
-mapping(uint256 => UserList) private userList; // 通过 []数组下标映射地址来存储所有用户的地址
-mapping(address => AdminStruct) private adminIndex; // 存储管理员在 管理员列表中的 索引(下标)
+mapping(uint256 => UserList) private userListMap; // 通过 []数组下标映射地址来存储所有用户的地址
+mapping(address => AdminStruct) private adminIndexMap; // 存储管理员在 管理员列表中的 索引(下标)
 mapping(address => string) private symbol;  // 存储助记符
 mapping(string => address) private symbolToAddr; // 存储助记符与地址的关联
 
@@ -52,7 +51,6 @@ modifier onlyAdministrator {
 }
 
 modifier onlyAdmin {
-    require(AddAdministrator, "Administrator,you must add yourself first!");
     require(isExitUserAddressFunc(msg.sender), "The current admin user address does not exist!"); 
     require(isAdminFunc(msg.sender),"You're not an admin!");    // 判断是否是管理员
  _;
@@ -82,10 +80,13 @@ function addUserFunc(address _addr,string memory _account, string memory _passwo
                 usertype: 0,    // 超级管理员
                 exist: true
             });
-            userList[0] = UserList({
+            userListMap[0] = UserList({
                 index: 0,    
                 userAddr: _addr
             });
+            // 超管 将自己先升级为管理员 
+            adminList.push(msg.sender) ;
+            adminIndexMap[msg.sender].index = 0; // 超级管理员索引为0
     }else{
         // 创建一个新的用户
         userStructMap[_addr] =  UserStruct({
@@ -97,7 +98,7 @@ function addUserFunc(address _addr,string memory _account, string memory _passwo
             usertype: 2,    // 普通用户
             exist: true
         });
-            userList[Sum] = UserList({
+            userListMap[Sum] = UserList({
             index: Sum,  
             userAddr: _addr
     });
@@ -140,13 +141,6 @@ function getAddressFunc(string memory _symbol) public view returns(address) {
 function getSumFunc() public view onlyAdmin returns(uint256) {
     return Sum;
 }
-// 超管必须先将自己先升级为管理员  
-function addMyselfFunc() public onlyAdministrator{
-    require(!AddAdministrator, "You already add yourself!");
-    adminList.push(msg.sender) ;
-    adminIndex[msg.sender].index = 0; // 超级管理员索引为0
-    AddAdministrator = true;   // 已经添加自己
-}
 // 查看所有管理员的地址 onlyAdmin
 function getAdminListFunc() public view onlyAdmin returns(address[] memory) {
     return adminList;
@@ -154,19 +148,18 @@ function getAdminListFunc() public view onlyAdmin returns(address[] memory) {
 
 //  查看用户的地址 onlyAdmin
 function getUserListFunc(uint256 _index) public view onlyAdmin returns(address) {
-    return userList[_index].userAddr;
+    return userListMap[_index].userAddr;
 }
 
 // 将用户升级为管理员
 function addAdminFunc(address _addr) public onlyAdministrator {
-    require(AddAdministrator, "You must add yourself first!");
     require(isExitUserAddressFunc(_addr), "User does not exist!");
     require(!isAdminFunc(_addr), "User is already an admin!");
     require(adminList.length < adminNum, "Administrator number is full!");
     userStructMap[_addr].usertype = 1;
     adminList.push(_addr);    // 将管理员添加到数组中
     // 已经修改了管理员数量 (adminList.length +1)
-    adminIndex[_addr].index = uint8(adminList.length) - 1; // 管理员索引 = 数组长度 - 1
+    adminIndexMap[_addr].index = uint8(adminList.length) - 1; // 管理员索引 = 数组长度 - 1
 }
 // 将管理员移除
 function removeAdminFunc(address _addr) public onlyAdministrator {
@@ -180,11 +173,11 @@ function removeAdminFunc(address _addr) public onlyAdministrator {
         adminList.pop(); 
     }else{
         // 当管理员数 >= 3 时, 将最后一个管理员移除的方法
-        adminList[adminIndex[_addr].index] = adminList[adminList.length - 1]; // 将最后一个管理员地址替代该管理员地址的位置
-        adminIndex[adminList[adminList.length - 1]].index = adminIndex[_addr].index; // 将最后一个管理员索引替代该管理员的索引
-        delete adminIndex[_addr]; // 删除该管理员的索引
+        adminList[adminIndexMap[_addr].index] = adminList[adminList.length - 1]; // 将最后一个管理员地址替代该管理员地址的位置
+        adminIndexMap[adminList[adminList.length - 1]].index = adminIndexMap[_addr].index; // 将最后一个管理员索引替代该管理员的索引
         adminList.pop(); // 将最后一个管理员地址从数组中移除
     }
+    delete adminIndexMap[_addr]; // 删除该管理员的索引
 }
 
 // 账号密码管理 
