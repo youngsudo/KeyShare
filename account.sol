@@ -52,6 +52,18 @@ function changeClass(string memory _oldClass,string memory _newClass) public {
     accountClassListMap[msg.sender][_index] = _newClass;    // 换名称
     accountClassIndexMap[msg.sender][_newClass] = _index;  // 修改索引
     delete accountClassIndexMap[msg.sender][_oldClass]; // 删除分类索引
+
+    // 如果分类下有Key,则必须修改分类下的 key
+    if (keyListMap[msg.sender][_oldClass].length > 0) {
+        for (uint i = 0; i < keyListMap[msg.sender][_oldClass].length; i++) {
+            KeyStruct memory key = keyListMap[msg.sender][_oldClass][i];
+            keyListMap[msg.sender][_newClass].push(KeyStruct({
+                key:key.key,
+                password:key.password
+            }));
+        }
+        delete keyListMap[msg.sender][_oldClass];
+    }
 }
 
 // 删除分类
@@ -120,11 +132,6 @@ function isKeyFunc(string memory _accountClass,string memory _key) public view r
 function returnClassAll(string memory _accountClass) public view returns (KeyStruct[] memory){
     return keyListMap[msg.sender][_accountClass];
 }
-
-
-
-
-
 
 
 }
