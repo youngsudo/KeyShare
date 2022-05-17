@@ -57,9 +57,10 @@ function changeClass(string memory _oldClass,string memory _newClass) public {
             KeyStruct memory key = keyListMap[msg.sender][_oldClass][i];
             keyListMap[msg.sender][_newClass].push(KeyStruct({
                 key:key.key,
-                password:key.password
+                password:key.password,
+                time:key.time
             }));
-        keyIndexMap[msg.sender][_newClass]["default"] = keyListMap[msg.sender][_newClass].length;
+            keyIndexMap[msg.sender]["default"][key.key] = keyListMap[msg.sender]["default"].length;
         }
         delete keyListMap[msg.sender][_oldClass];
     }
@@ -94,9 +95,10 @@ function deleteAccountClassFunc(string memory _accountClass) public {
                 KeyStruct memory key = keyListMap[msg.sender][_accountClass][i];
                 keyListMap[msg.sender]["default"].push(KeyStruct({
                     key:key.key,
-                    password:key.password
+                    password:key.password,
+                    time:key.time
                 }));
-                keyIndexMap[msg.sender][_accountClass]["default"] = keyListMap[msg.sender]["default"].length;
+                keyIndexMap[msg.sender]["default"][key.key] = keyListMap[msg.sender]["default"].length;
             }
         delete keyListMap[msg.sender][_accountClass];
     }
@@ -112,6 +114,7 @@ function str(string memory _str1,string memory _str2) internal pure returns(bool
 struct KeyStruct{ // 保存的账号和密码
     string key;
     string password;
+    string time;
 }
 // 通过地址和分类名 获取Key数组
 mapping (address => mapping(string => KeyStruct[])) public keyListMap;
@@ -119,7 +122,7 @@ mapping (address => mapping(string => KeyStruct[])) public keyListMap;
 mapping(address => mapping(string => mapping(string => uint256))) public keyIndexMap; 
 
 // 添加账号 不要索引
-function addKeyFunc(string memory _accountClass,string memory _key,string memory _pass) public {
+function addKeyFunc(string memory _accountClass,string memory _key,string memory _pass,string memory _time) public {
     require(isAccountClassFunc(_accountClass), "Account type does not exist!");
 
     // 判断是否已经存在该账号
@@ -128,16 +131,17 @@ function addKeyFunc(string memory _accountClass,string memory _key,string memory
     // 添加账号
     keyListMap[msg.sender][_accountClass].push(KeyStruct({
         key:_key,
-        password:_pass
+        password:_pass,
+        time: _time
     }));
     // 添加分类下Key索引,不要索引,使用第几个
-    keyIndexMap[msg.sender][_accountClass][_key] = keyListMap[msg.sender][_accountClass].length;
+    keyIndexMap[msg.sender][_accountClass][_key] = keyListMap[msg.sender][_accountClass].length; // 不要索引!!!!!!
 }
 
 // 判断账号(Key)是否存在
 function isKeyFunc(string memory _accountClass,string memory _key) public view returns(bool){
-    if(keyListMap[msg.sender][_accountClass].length == 0){return false;}  // 判断分类下的Key是否为空,为空则肯定不存在
-    return keyIndexMap[msg.sender][_accountClass][_key] != 0;   // 判断是否存在该Key
+    uint256 index = keyIndexMap[msg.sender][_accountClass][_key];   // 获取该Key的位置而不是索引
+    return index != 0;  // 个数绝对不会为0,因为添加时已经判断了
 }
 
 // 返回所有Key(数组)
@@ -149,7 +153,9 @@ function returnClassAll(string memory _accountClass) public view returns (KeyStr
 function deleteKeyFunc(string memory _accountClass,string memory _key) public {
     require(isAccountClassFunc(_accountClass), "Account type does not exist!");
     require(isKeyFunc(_accountClass,_key), "Account key does not exist!");
-    delete keyListMap[msg.sender][_accountClass][keyIndexMap[msg.sender][_accountClass][_key] - 1]; // keyIndexMap是从1开始的
+   
+    uint256 index = keyIndexMap[msg.sender][_accountClass][_key];   // 获取该Key的位置而不是索引
+    delete keyListMap[msg.sender][_accountClass][index - 1 ]; 
     delete keyIndexMap[msg.sender][_accountClass][_key];
 }
 
@@ -157,7 +163,26 @@ function deleteKeyFunc(string memory _accountClass,string memory _key) public {
 function updateKeyFunc(string memory _accountClass,string memory _key,string memory _pass) public {
     require(isAccountClassFunc(_accountClass), "Account type does not exist!");
     require(isKeyFunc(_accountClass,_key), "Account key does not exist!");
-    keyListMap[msg.sender][_accountClass][keyIndexMap[msg.sender][_accountClass][_key] - 1].password = _pass;
+    keyListMap[msg.sender][_accountClass][keyIndexMap[msg.sender][_accountClass][_key]].password = _pass;
 
 }
+
+// 移动某个 Key 到其他分类
+function moveFunc(string memory _oldClass,string memory _newClass,string memory _key) public {
+    require(isAccountClassFunc(_oldClass), "Account type does not exist!");
+    require(isAccountClassFunc(_newClass), "Account type does not exist!");
+            uint256 index = keyIndexMap[msg.sender][_oldClass][_key];
+            KeyStruct memory key = keyListMap[msg.sender][_oldClass][index - 1];
+            keyListMap[msg.sender][_newClass].push(KeyStruct({
+                key:key.key,
+                password:key.password,
+                time:key.time
+            }));
+
+        keyIndexMap[msg.sender][_newClass][key.key] = keyListMap[msg.sender][_newClass].length;
+        delete keyListMap[msg.sender][_oldClass][index - 1 ];
+    
+}
+
+
 }
