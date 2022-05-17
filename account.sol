@@ -1,6 +1,3 @@
-// 需求:给 msg.sender 添加分类数据
-// 添加的分类只属于该用户，不同的用户可以添加相同的分类
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -44,6 +41,7 @@ function returnClassAll() public view returns (string[] memory){
 function changeClass(string memory _oldClass,string memory _newClass) public {
     // 判断是否存在该分类
     require(isAccountClassFunc(_oldClass), "Account type does not exist!");
+    require(!isAccountClassFunc(_newClass), "Account type is exist!");
     // 判断是否是默认分类
     require(!str(_oldClass, "default"), "Default type cannot be modified!");
     require(!str(_newClass, "default"), "Default type cannot be modified!");
@@ -61,6 +59,7 @@ function changeClass(string memory _oldClass,string memory _newClass) public {
                 key:key.key,
                 password:key.password
             }));
+        keyIndexMap[msg.sender][_newClass]["default"] = keyListMap[msg.sender][_newClass].length;
         }
         delete keyListMap[msg.sender][_oldClass];
     }
@@ -87,6 +86,19 @@ function deleteAccountClassFunc(string memory _accountClass) public {
         accountClassListMap[msg.sender].pop();      // 删除最后一个分类
         accountClassIndexMap[msg.sender][_last] = deleteIndex;  // 修改索引
         delete accountClassIndexMap[msg.sender][_accountClass]; // 删除分类索引
+    }
+
+     // 如果分类下有Key,则必须将分类下的 key 移动到 default
+    if (keyListMap[msg.sender][_accountClass].length > 0) {
+        for (uint i = 0; i < keyListMap[msg.sender][_accountClass].length; i++) {
+                KeyStruct memory key = keyListMap[msg.sender][_accountClass][i];
+                keyListMap[msg.sender]["default"].push(KeyStruct({
+                    key:key.key,
+                    password:key.password
+                }));
+                keyIndexMap[msg.sender][_accountClass]["default"] = keyListMap[msg.sender]["default"].length;
+            }
+        delete keyListMap[msg.sender][_accountClass];
     }
 }
 
