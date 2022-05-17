@@ -10,6 +10,21 @@ mapping (address => string[]) public accountClassListMap;
 // 通过地址获取分类数组的索引
 mapping(address => mapping(string => uint256)) private accountClassIndexMap;  // 存储分类结构体的索引
 
+// 添加分类事件
+event addAccountClassEvent(address indexed userAddr,string accountClass);
+// 修改分类事件
+event modifyAccountClassEvent(address indexed userAddr,string accountClass,string oldAccountClass); 
+// 删除分类事件
+event deleteAccountClassEvent(address indexed userAddr,string accountClass);
+// 添加账号(Key)事件
+event addKeyEvent(address indexed userAddr,string accountClass,string key,string createtime);
+// 删除账号(Key)事件
+event deleteKeyEvent(address indexed userAddr,string accountClass,string key);
+// 修改账号(Key)事件
+event modifyKeyEvent(address indexed userAddr,string accountClass,string key);
+// 移动账号(Key)事件
+event moveKeyEvent(address indexed userAddr,string accountClass,string key,string oldAccountClass);
+
 // 添加分类
 function addAccountClassFunc(string memory _accountClass) public  {
     // 判断是否已经存在该分类
@@ -24,6 +39,8 @@ function addAccountClassFunc(string memory _accountClass) public  {
     accountClassListMap[msg.sender].push(_accountClass);
     // 添加分类索引 数组已经提前加了 1,所以索引得减一
     accountClassIndexMap[msg.sender][_accountClass] = accountClassListMap[msg.sender].length - 1;
+
+    emit addAccountClassEvent(msg.sender,_accountClass);
 }
 
 // 判断分类是否存在 
@@ -37,6 +54,7 @@ function isAccountClassFunc(string memory _accountClass) internal view returns(b
 function returnClassAll() public view returns (string[] memory){
     return accountClassListMap[msg.sender];
 }
+
 // 修改分类名
 function changeClass(string memory _oldClass,string memory _newClass) public {
     // 判断是否存在该分类
@@ -64,6 +82,8 @@ function changeClass(string memory _oldClass,string memory _newClass) public {
         }
         delete keyListMap[msg.sender][_oldClass];
     }
+
+    emit modifyAccountClassEvent(msg.sender,_newClass,_oldClass);
 }
 
 // 删除分类
@@ -102,6 +122,8 @@ function deleteAccountClassFunc(string memory _accountClass) public {
             }
         delete keyListMap[msg.sender][_accountClass];
     }
+
+    emit deleteAccountClassEvent(msg.sender,_accountClass);
 }
 
 // 判断两个字符串是否相等
@@ -136,6 +158,8 @@ function addKeyFunc(string memory _accountClass,string memory _key,string memory
     }));
     // 添加分类下Key索引,不要索引,使用第几个
     keyIndexMap[msg.sender][_accountClass][_key] = keyListMap[msg.sender][_accountClass].length; // 不要索引!!!!!!
+
+    emit addKeyEvent(msg.sender,_accountClass,_key,_time);
 }
 
 // 判断账号(Key)是否存在
@@ -157,6 +181,8 @@ function deleteKeyFunc(string memory _accountClass,string memory _key) public {
     uint256 index = keyIndexMap[msg.sender][_accountClass][_key];   // 获取该Key的位置而不是索引
     delete keyListMap[msg.sender][_accountClass][index - 1 ]; 
     delete keyIndexMap[msg.sender][_accountClass][_key];
+
+    emit deleteKeyEvent(msg.sender,_accountClass,_key);
 }
 
 // 修改Key的密码
@@ -165,6 +191,7 @@ function updateKeyFunc(string memory _accountClass,string memory _key,string mem
     require(isKeyFunc(_accountClass,_key), "Account key does not exist!");
     keyListMap[msg.sender][_accountClass][keyIndexMap[msg.sender][_accountClass][_key]].password = _pass;
 
+    emit modifyKeyEvent(msg.sender,_accountClass,_key);
 }
 
 // 移动某个 Key 到其他分类
@@ -181,8 +208,6 @@ function moveFunc(string memory _oldClass,string memory _newClass,string memory 
 
         keyIndexMap[msg.sender][_newClass][key.key] = keyListMap[msg.sender][_newClass].length;
         delete keyListMap[msg.sender][_oldClass][index - 1 ];
-    
+    emit moveKeyEvent(msg.sender,_oldClass,_newClass,_key);
 }
-
-
 }

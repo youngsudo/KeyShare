@@ -56,6 +56,14 @@ modifier onlyAdmin {
  _;
 }
 
+// 添加用户事件
+event addUserEvent(address indexed userAddr,string indexed account,string indexed email);
+// 升级管理员事件
+event upgradeAdminEvent(address indexed userAddr);
+// 移除管理员事件
+event removeAdminEvent(address indexed userAddr);
+
+
 // 创建一个新用户
 function addUserFunc(address _addr,string memory _account, string memory _password, string memory _email,string memory _symbol) public {
    require(!isExitUserAddressFunc(_addr), "User already exists! please use another address");
@@ -102,6 +110,8 @@ function addUserFunc(address _addr,string memory _account, string memory _passwo
             index: Sum,  
             userAddr: _addr
     });
+
+    emit addUserEvent(_addr,_account,_email);
     }
 }
 
@@ -160,6 +170,8 @@ function addAdminFunc(address _addr) public onlyAdministrator {
     adminList.push(_addr);    // 将管理员添加到数组中
     // 已经修改了管理员数量 (adminList.length +1)
     adminIndexMap[_addr].index = uint8(adminList.length) - 1; // 管理员索引 = 数组长度 - 1
+
+    emit upgradeAdminEvent(_addr);
 }
 // 将管理员移除
 function removeAdminFunc(address _addr) public onlyAdministrator {
@@ -178,6 +190,7 @@ function removeAdminFunc(address _addr) public onlyAdministrator {
         adminList.pop(); // 将最后一个管理员地址从数组中移除
     }
     delete adminIndexMap[_addr]; // 删除该管理员的索引
+    emit removeAdminEvent(_addr);
 }
 
 // 账号密码管理 
