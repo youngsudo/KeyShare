@@ -1,0 +1,31 @@
+#Checkbox {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 30px;
+}
+
+#flex_big_div {
+    position: relative;
+}
+
+#flex_but_div {
+    display: none;
+    position: absolute;
+    left: 30px;
+    top: -32px;
+}
+
+#createPass {
+    display: none;
+}
+
+#eyePass {
+    position: relative;
+}
+
+#showEye {
+    position: absolute;
+    right: 12px;
+    top: 17px;
+}

@@ -1,0 +1,12 @@
+.verification{
+    position: relative;
+}
+
+/* #verificationCode{
+    position: absolute;
+} */
+.code{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}

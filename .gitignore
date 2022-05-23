@@ -1,0 +1,6 @@
+*.exe
+*.exe~
+*.log
+tmpl/
+.vscode/
+.idea/

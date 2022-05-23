@@ -1,0 +1,3 @@
+abigen -abi test.abi -type test -pkg contract -out test.go
+
+abigen -abi keyShare.abi -type keyShare -pkg contract -out keyShare.go

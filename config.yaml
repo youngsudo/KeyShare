@@ -1,0 +1,39 @@
+app:
+  name: "web_app"
+  mode: "dev"
+  port: 8080
+  start_time: "2022-05-19"
+  machine_id: 1
+
+log:
+  level: "debug"
+  filename: "./log/web_app.log"
+  max_size: 20
+  max_age: 30
+  max_backups: 10
+
+mysql:
+  host: "localhost"
+  port: 3306
+  user: "root"
+  password: "123456"
+  database: "keyshare"
+  maxOpenConns: 200
+  maxIdleConns: 50
+
+redis: 
+  host: "localhost"
+  port: 6379 
+  password: "123456"
+  db: 0
+  poolSize: 100
+
+eth:
+  ethclient: "HTTP://127.0.0.1:7545"
+  contract: "0x7CD3ef048E0392671F6c10ECEE948f23c6405b08"
+  admin: "0x0ca0B737a0344E4Dad27e58211ED8aFAd387670b"
+  privateKey: "597e158e4b7ec7be03d8d06583978790b6147627a6553b69be9aeabfdef7a847"
+  keystore_name: ""
+  give_eth: true
+  give_num: 10  # ETH
+  
