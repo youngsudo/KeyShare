@@ -1,19 +1,22 @@
 $(document).ready(function () {
-    $("#login_btn").click(() => {     
+    $("#login_btn").click(() => {
         console.log($("#account").val(),
             $("#password").val());
+            let account = $("#account").val();
+            let password = $("#password").val();
+            let isCheck = false; // 是否勾选
         // 判断 account
-        if ($("#account").val() == "") {
+        if (account == "") {
             alert("请输入账号");
             return;
         }
         // 如果输入的是地址
-        if (/^(0x)?[0-9a-fA-F]{40}$/.test($("#account").val())) {
-            $("#account").val($("#account").val());
+        if (/^(0x)?[0-9a-fA-F]{40}$/.test(account)) {
+            console.log(account);
         }
         // 如果输入的是账号
-        else if (/^[a-zA-Z0-9]{4,16}$/.test($("#account").val())) {
-            $("#account").val($("#account").val().toLowerCase());
+        else if (/^[a-zA-Z0-9]{4,16}$/.test(account)) {
+            console.log(account.toLowerCase());
         }
         // 报错
         else {
@@ -22,27 +25,48 @@ $(document).ready(function () {
         }
 
         // 判断 password
-        if ($("#password").val() == "") {
+        if (password == "") {
             alert("请输入密码");
             return;
         }
-        if (/^[a-zA-Z0-9]{4,32}$/.test($("#password").val())) {
-            $("#password").val($("#password").val());
+        if (/^[a-zA-Z0-9]{4,32}$/.test(password)) {
+            console.log(password);
         } else {
             alert("密码格式错误");
             return;
         }
 
         // 记住我
-        if($("#checkbox").is(":checked")){
+        if ($("#checkbox").is(":checked")) {
             // 选中
-           console.log(1)
-        }else{
-            console.log(2)
+            isCheck = true;
         }
+
+        console.log(account,password,isCheck)
+        $.ajax({
+            url: "/api/v1/login",
+            type: "post",
+            datType: "JSON",
+            data: JSON.stringify({
+                "account": account,
+                "password": password,
+            }),
+            success: function (data) {
+                console.log(data)
+            }
+        })
 
     })
 })
+
+// function loginType(i) {
+//     console.log(i.attributes.ind.value)
+//     if (i.attributes.ind.value == "login") {
+//         window.location.href = "/api/v1/loginToAddress";
+//     } else {
+//         window.location.href = "/api/v1/login";
+//     }
+// }
 
 // if($("#account").val().indexOf("@") != -1){
 //     // 判断邮箱格式

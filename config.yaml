@@ -8,7 +8,7 @@ app:
 log:
   level: "debug"
   filename: "./log/web_app.log"
-  max_size: 20
+  max_size: 1
   max_age: 30
   max_backups: 10
 
@@ -30,9 +30,9 @@ redis:
 
 eth:
   ethclient: "HTTP://127.0.0.1:7545"
-  contract: "0x7CD3ef048E0392671F6c10ECEE948f23c6405b08"
-  admin: "0x0ca0B737a0344E4Dad27e58211ED8aFAd387670b"
-  privateKey: "597e158e4b7ec7be03d8d06583978790b6147627a6553b69be9aeabfdef7a847"
+  contract: "0x57c00f70F8Ee51D0115e180AF8d71eF6Bf47b628"
+  admin: "0x8905d75CF1C7dD577083D61C6D3DA9f13Ed30DEA"
+  privateKey: "db56a758b6c0528089b6500b839c23c3d7eaf59931ba96613de5c2770ede4b53"
   keystore_name: ""
   give_eth: true
   give_num: 10  # ETH

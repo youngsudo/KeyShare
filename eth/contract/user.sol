@@ -209,7 +209,7 @@ function loginFunc(address _addr,string memory _account, string memory _password
         if (isExitUserAccountFunc(_account)) {
             // 通过账号获取到存储到用户信息的密码与用户输入的密码进行比较
             if(keccak256(abi.encode(userStructMap[accountMap[_account]].password))== keccak256(abi.encode(_password))){
-                return (true,userStructMap[_addr].usertype);    // 登陆成功
+                return (true,userStructMap[accountMap[_account]].usertype);    // 登陆成功
             }
         }  
         return (false,UserType.normal); // 登陆失败

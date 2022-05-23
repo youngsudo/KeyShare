@@ -7,11 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Setup() *gin.Engine {
+func Setup(mode string) *gin.Engine {
+	if mode == gin.ReleaseMode {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	r := gin.New()
 	r.Use(logger.GinLogger(), logger.GinRecovery(true)) // 日志中间件
-	gin.SetMode(gin.DebugMode)                          //设置模式 ReleaseMode生产模式,DebugMode开发模式
-
 	// 告诉gin框架模板文件引用的静态文件去哪里找
 	r.Static("/static", "static")
 	// 告诉gin框架去哪里找模板文件
@@ -28,6 +29,7 @@ func Setup() *gin.Engine {
 	}
 	{
 		app.POST("/register", controllers.SignUpHandler)
+		app.POST("/login", controllers.LoginHandler)
 	}
 
 	return r

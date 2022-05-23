@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// 将私钥转换成 私钥,公钥,地址字符串
 func GenerateKey(privateKey *ecdsa.PrivateKey) (string, string, string) {
 	privateKeyBytes := crypto.FromECDSA(privateKey) // 使用FromECDSA方法将其转换为字节
 	// fmt.Println("私钥", hexutil.Encode(privateKeyBytes)[2:]) // 0x
