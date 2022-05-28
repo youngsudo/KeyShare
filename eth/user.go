@@ -44,8 +44,9 @@ func IsAdminView(addr string) (bool, error) {
 }
 
 // 登录
-func Login(addr, account, password string) (bool, uint8, error) {
-	return KeyShare.LoginFunc(nil, common.HexToAddress(addr), account, password)
+func Login(addr, account, password string) (bool, uint8, string, error) {
+	b, userType, _address, err := KeyShare.LoginFunc(nil, common.HexToAddress(addr), account, password)
+	return b, userType, _address.Hex(), err
 }
 
 /*

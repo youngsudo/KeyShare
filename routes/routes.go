@@ -19,14 +19,17 @@ func Setup(mode string) *gin.Engine {
 	r.LoadHTMLGlob("templates/*")
 
 	// 路由组
+	r.GET("/api/v1/login", controllers.GetLoginHandler)
+	r.GET("/api/v1/register", controllers.GetRegisterHandler)
+	r.GET("/api/v1/registerToAddress", controllers.GetRegisterToAddressHandler)
+
+	// app := r.Group("/api/v1", middlewares.JWTAuthMiddleware())
 	app := r.Group("/api/v1")
 	{
 		app.GET("/", controllers.GetIndexHandler)
 		app.GET("/index", controllers.GetIndexHandler)
-		app.GET("/login", controllers.GetLoginHandler)
-		app.GET("/register", controllers.GetRegisterHandler)
-		app.GET("/registerToAddress", controllers.GetRegisterToAddressHandler)
 	}
+
 	{
 		app.POST("/register", controllers.SignUpHandler)
 		app.POST("/login", controllers.LoginHandler)

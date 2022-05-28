@@ -24,7 +24,7 @@ func Init(cfg *setting.LogConfig, mode string) (err error) {
 		cfg.MaxBackups,
 		cfg.MaxAge,
 	)
-	encoder := getEncoder()
+	encoder := getEncoder(mode)
 	var l = new(zapcore.Level) // 声明一个空的级别
 	err = l.UnmarshalText([]byte(cfg.Level))
 	if err != nil {
@@ -50,7 +50,7 @@ func Init(cfg *setting.LogConfig, mode string) (err error) {
 	return
 }
 
-func getEncoder() zapcore.Encoder {
+func getEncoder(mode string) zapcore.Encoder {
 	// 自定义日志格式
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "ts",                           // 时间
@@ -67,8 +67,12 @@ func getEncoder() zapcore.Encoder {
 		EncodeCaller:   zapcore.ShortCallerEncoder,     // 短路径编码调用者
 	}
 
-	return zapcore.NewJSONEncoder(encoderConfig) // JSON格式
-	// return zapcore.NewConsoleEncoder(encoderConfig) // 控制台格式
+	if mode == "dev" || mode == gin.DebugMode {
+		// 开发模式,打印详细的日志
+		return zapcore.NewConsoleEncoder(encoderConfig) // 控制台格式
+	} else {
+		return zapcore.NewJSONEncoder(encoderConfig) // JSON格式
+	}
 }
 
 func getLogWriter(filename string, maxSize, maxBackup, maxAge int) zapcore.WriteSyncer {

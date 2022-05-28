@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,6 +9,18 @@ import (
 
 // 首页
 func GetIndexHandler(c *gin.Context) {
+	userID, err := getCurrentUser(c)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("userID------>", userID)
+
+	addr, ok := c.Get("account")
+	if !ok {
+		fmt.Println(err)
+	}
+	fmt.Println("Account:------->", addr)
+
 	c.HTML(http.StatusOK, "index.html", gin.H{})
 }
 

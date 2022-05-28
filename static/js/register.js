@@ -96,6 +96,7 @@ $(document).ready(function () {
             }),
             success: function (data) {
                 console.log(data)
+                alert("注册成功");
             }
         })
 

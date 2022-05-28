@@ -196,23 +196,23 @@ function removeAdminFunc(address _addr) public onlyAdministrator {
 // 
 // 用户登陆  账号或地址登陆,返回用户账号密码是否正确与 成功时 用户的类型,用于判断是否为管理员
 // 与合约本身无关系, 只是为了方便后台管理,必须传递一个地址
-function loginFunc(address _addr,string memory _account, string memory _password) public view returns(bool,UserType) {
+function loginFunc(address _addr,string memory _account, string memory _password) public view returns(bool,UserType,address) {
     if (keccak256(abi.encode(_account)) == keccak256(abi.encode(""))){  // 如果传递的账号为空,则表示用地址登陆
         if (isExitUserAddressFunc(_addr)) {
             // 通过地址获取到存储到用户信息的密码与用户输入的密码进行比较
             if(keccak256(abi.encode(userStructMap[_addr].password))== keccak256(abi.encode(_password))){
-                return (true,userStructMap[_addr].usertype);    // 登陆成功
+                return (true,userStructMap[_addr].usertype,userStructMap[_addr].addr);    // 登陆成功
             }
         }        
-        return (false,UserType.normal); // 登陆失败
+        return (false,UserType.no,userStructMap[_addr].addr); // 登陆失败
     }else{
         if (isExitUserAccountFunc(_account)) {
             // 通过账号获取到存储到用户信息的密码与用户输入的密码进行比较
             if(keccak256(abi.encode(userStructMap[accountMap[_account]].password))== keccak256(abi.encode(_password))){
-                return (true,userStructMap[accountMap[_account]].usertype);    // 登陆成功
+                return (true,userStructMap[accountMap[_account]].usertype,userStructMap[accountMap[_account]].addr);    // 登陆成功
             }
         }  
-        return (false,UserType.normal); // 登陆失败
+        return (false,UserType.no,userStructMap[accountMap[_account]].addr); // 登陆失败
     }
 }
 // 用户查看自己的信息  

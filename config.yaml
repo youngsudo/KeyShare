@@ -30,9 +30,9 @@ redis:
 
 eth:
   ethclient: "HTTP://127.0.0.1:7545"
-  contract: "0x57c00f70F8Ee51D0115e180AF8d71eF6Bf47b628"
-  admin: "0x8905d75CF1C7dD577083D61C6D3DA9f13Ed30DEA"
-  privateKey: "db56a758b6c0528089b6500b839c23c3d7eaf59931ba96613de5c2770ede4b53"
+  contract: "0x17Fc3153364EE990047f51307a0c06D76b648E08"
+  admin: "0x18e823751823cf6e0e0Ec0b321104Ce5529246CF"
+  privateKey: "239bd14d6f62d922ccd18db83360415e9486306c05d4727c1eee1755e3378d92"
   keystore_name: ""
   give_eth: true
   give_num: 10  # ETH

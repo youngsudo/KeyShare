@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"app/models"
 	"fmt"
 	"time"
 
@@ -37,4 +38,17 @@ func InsertUser(user_id int64, address, account, email, password, privatekey str
 	fmt.Printf("insert success, the id is %d.\n", theID)
 	zap.L().Info("insert success", zap.Int64("theID", theID))
 	return nil
+}
+
+func GetUserByAddress(address string) (user *models.DBUser, err error) {
+	sqlStr := `select * from tab_user where address = ?;`
+	//执行 SQL 语句
+	var u models.DBUser
+	err = db.Get(&u, sqlStr, address)
+	if err != nil {
+		fmt.Printf("get failed, err:%v\n", err)
+		return
+	}
+	// fmt.Printf("User:%v\n", u)
+	return &u, nil
 }

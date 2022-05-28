@@ -2,9 +2,9 @@ $(document).ready(function () {
     $("#login_btn").click(() => {
         console.log($("#account").val(),
             $("#password").val());
-            let account = $("#account").val();
-            let password = $("#password").val();
-            let isCheck = false; // 是否勾选
+        let account = $("#account").val();
+        let password = $("#password").val();
+        let isCheck = false; // 是否勾选
         // 判断 account
         if (account == "") {
             alert("请输入账号");
@@ -42,7 +42,7 @@ $(document).ready(function () {
             isCheck = true;
         }
 
-        console.log(account,password,isCheck)
+        console.log(account, password, isCheck)
         $.ajax({
             url: "/api/v1/login",
             type: "post",
@@ -51,8 +51,21 @@ $(document).ready(function () {
                 "account": account,
                 "password": password,
             }),
-            success: function (data) {
-                console.log(data)
+            success: function (res) {
+                // console.log(res)
+                // console.log(res.data.token)
+                // token Authorization
+                // 存储token
+                // sessionStorage.setItem("token", res.data.token);
+                // localStorage.setItem("token", JSON.stringify(res.data.token));
+                // localStorage.setItem("user_type", JSON.stringify(res.data.userType));
+                // 存储账号
+                // localStorage.setItem("account", account);
+                // 存储记住我
+                // localStorage.setItem("isCheck", isCheck);
+                // 跳转
+                window.location.href = "/api/v1/index";
+
             }
         })
 

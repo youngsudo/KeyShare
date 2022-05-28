@@ -348,6 +348,11 @@
 				"internalType": "enum UserType",
 				"name": "",
 				"type": "uint8"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",

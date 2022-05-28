@@ -4,8 +4,8 @@ import (
 	"app/dao/mysql"
 	"app/eth"
 	"app/models"
-	"app/pkg/aesctr"
 	bip "app/pkg/bip39"
+	"app/pkg/password"
 	"app/pkg/snowflake"
 	"app/setting"
 	"errors"
@@ -78,13 +78,10 @@ func SignUp(p *models.ParamSignUp) error {
 
 	// 3. 密码加密
 	// pass := p.Password
-	key := "1234567887654321"                                                 // 密钥
-	encryptData, err := aesctr.AesCtrEncrypt([]byte(p.Password), []byte(key)) //加密 []bytes
+	pass, err := password.HashPassword(p.Password)
 	if err != nil {
 		return ErrorAesCtrPass
 	}
-
-	pass := fmt.Sprintf("%x\n", encryptData)
 	// 4. 创建用户
 	// 如果没有传入地址，则生成地址,如果传入地址，则使用传入的地址,同时也将用户上传的助记词(任意字符串)保存到合约中
 	// ecdsaPrivateKey := new(ecdsa.PrivateKey) // 生成私钥
@@ -116,10 +113,7 @@ func SignUp(p *models.ParamSignUp) error {
 	} else {
 		return errors.New("地址和私钥(助记词)不能同时为空")
 	}
-	// 用户瞎传助记词
-
 	// 生成私钥,公钥,地址
-
 	zap.L().Debug("privateKey", zap.String("privateKey", privateKey))
 	zap.L().Debug("publicKey", zap.String("publicKey", publicKey))
 	zap.L().Debug("address", zap.String("address", address))
@@ -144,7 +138,7 @@ func SignUp(p *models.ParamSignUp) error {
 		p.Mnemonic = *mnemonic
 	}
 
-	// 将用户信息添加到合约
+	// 将用户信息添加到合约,不传加密的密码
 	tx, err := eth.AddUserPublic(opts, p.Address, p.Account, p.Password, p.Email, p.Mnemonic)
 	if err != nil {
 		zap.L().Info("AddUserPublic", zap.Error(err))
@@ -152,8 +146,15 @@ func SignUp(p *models.ParamSignUp) error {
 		return err
 	}
 	zap.L().Info("添加一个用户", zap.String("address", p.Address), zap.String("tx", tx.Hash().Hex()))
+
 	// 4. 将用户信息写入数据库
-	err = mysql.InsertUser(userID, p.Address, p.Account, p.Email, pass, privateKey)
+	key := "1234567887654321"                                                   // 加密私钥                                               // 密钥
+	encryptData, err := password.AesCtrEncrypt([]byte(privateKey), []byte(key)) //加密 []bytes
+	if err != nil {
+		return ErrorAesCtrPass
+	}
+	private_key := fmt.Sprintf("%x\n", encryptData)
+	err = mysql.InsertUser(userID, p.Address, p.Account, p.Email, pass, private_key)
 	if err != nil {
 		zap.L().Warn("MySQL添加用户错误", zap.Error(err))
 		return err
@@ -163,7 +164,7 @@ func SignUp(p *models.ParamSignUp) error {
 }
 
 // 登陆
-func Logining(p *models.ParamLogin) (uint8, error) {
+func Login(p *models.ParamLogin) (uint8, string, error) {
 	zap.L().Debug("登陆", zap.String("account", p.Account), zap.String("password", p.Password))
 	fmt.Println("登陆", p.Account, p.Password)
 	re := regexp.MustCompile("^0x[0-9a-fA-F]{40}$") // 正则表达式
@@ -184,12 +185,13 @@ func Logining(p *models.ParamLogin) (uint8, error) {
 	fmt.Println(_address, _account)
 
 	// userType 用户身份, 0为超级管理员,1为管理员,2为普通用户,3 即为错误
-	b, userType, err := eth.Login(_address, _account, p.Password)
+	b, userType, address, err := eth.Login(_address, _account, p.Password)
 	if err != nil {
 		zap.L().Debug("eth.IsExitUserAddressView failed", zap.Error(err))
 	}
 	if !b {
-		return 3, ErrorAccountPassword
+		return 3, "", ErrorAccountPassword
 	}
-	return userType, nil
+	// fmt.Println(userType, address)
+	return userType, address, nil
 }

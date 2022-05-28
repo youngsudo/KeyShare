@@ -7,7 +7,7 @@
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True">
 	
-	<link rel="shortcut icon" href="/static/img/favicon.png">
+	<link rel="shortcut icon" href="/static/img/favicon.ico">
 	
 	<link rel="stylesheet" href="/static/css/font-awesome.min.css">
 	<link rel="stylesheet" href="/static/css/materialize.min.css">
@@ -30,10 +30,10 @@
 				<a href="#" data-activates="slide-out-left" class="sidenav-control"><i class="fa fa-bars"></i></a>
 			</div>
 			<div class="site-title">
-				<a href="index.html" class="logo"><h1>KeyShare</h1></a>
+				<a href="index" class="logo"><h1>KeyShare</h1></a>
 			</div>
 			<div class="panel-control-right">
-				<a href="contact.html"><i class="fa fa-envelope"></i></a>
+				<a href="contact"><i class="fa fa-envelope"></i></a>
 			</div>
 		</div>
 	</div>
@@ -83,35 +83,35 @@
 	<div class="slider-slick app-pages">
 		<div class="slider-entry">
 			
-			<img src="/static/img/slider1.jpg" alt="">
+			<img src="/static/img/slider01.jpeg" alt="">
 			<div class="overlay"></div>
 			<div class="caption">
 				<div class="container">
-					<h2>标题</h2>
-					<p>副标题</p>
-					<button class="button">按钮</button>
+					<h2>便捷</h2>
+					<p>方便快捷得管理你的钥匙</p>
+					<!-- <button class="button">按钮</button> -->
 				</div>
 			</div>
 		</div>
 		<div class="slider-entry">
 			<div class="overlay"></div>
-			<img src="/static/img/slider2.jpg" alt="">
+			<img src="/static/img/slider02.jpeg" alt="">
 			<div class="caption">
 				<div class="container">
-					<h2>Awesome Features</h2>
-					<p>Lorem Ipsum Dolor Sit Meta</p>
-					<button class="button">Read More</button>
+					<h2>安全</h2>
+					<p>通过区块链保护你的账号密码安全</p>
+					<!-- <button class="button">Read More</button> -->
 				</div>
 			</div>
 		</div>
 		<div class="slider-entry">
 			<div class="overlay"></div>
-			<img src="/static/img/slider3.jpg" alt="">
+			<img src="/static/img/slider03.jpeg" alt="">
 			<div class="caption">
 				<div class="container">
-					<h2>Perfect Templates</h2>
-					<p>Lorem Ipsum Dolor Sit Meta</p>
-					<button class="button">Read More</button>
+					<h2>共享</h2>
+					<p>充分利用闲置资源,便利大家的生活</p>
+					<!-- <button class="button">Read More</button> -->
 				</div>
 			</div>
 		</div>
@@ -122,7 +122,7 @@
 	<!-- offers -->
 	<div class="offers app-section">
 		<div class="container">
-			<div class="offers-content">
+			<div class="offers-content" data-url="/key">
 				<div class="row">
 					<div class="col s4">
 						<div class="icon icon1">
@@ -137,7 +137,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="offers-content">
+			<div class="offers-content" data-url="/myshare">
 				<div class="row">
 					<div class="col s4">
 						<div class="icon icon2">
@@ -152,7 +152,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="offers-content">
+			<div class="offers-content" data-url="/keyshare">
 				<div class="row row-margin">
 					<div class="col s4">
 						<div class="icon icon3">
@@ -184,8 +184,11 @@
 	<div class="portfolio note app-section app-bg-dark" style="background-color: #14a8ff;">
 		<div class="container">
 			<div class="container">
-				<h5>Amazing Design</h5>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Incidunt numquam possimus suscipit facere, delectus, quaerat voluptatibus architecto mollitia.</p>
+				<h5>共享钥匙</h5>
+				<p>它可以很好得保护你的密码。<br>
+					你可以将自己的钥匙共享给他人.<br>
+					你还能够与他人沟通使用他人的钥匙
+				</p>
 			</div>
 			<!-- <div class="app-title">
 				<h4>Portfolio</h4>
@@ -292,5 +295,6 @@
 	<script src="/static/js/lightbox.min.js"></script>
 	<script src="/static/js/custom-portfolio.js"></script>
 	<script src="/static/js/custom.js"></script>
+	<script src="/static/js/index.js"></script>
 </body>
 </html>

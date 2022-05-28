@@ -1,5 +1,6 @@
-package aesctr
+package password
 
+// AES算法 + CBC模式 对称加密
 import (
 	"bytes"
 	"crypto/aes"

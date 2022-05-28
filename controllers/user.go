@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"app/dao/mysql"
 	"app/logic"
 	"app/models"
+	"app/pkg/jwt"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -56,11 +58,30 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 	// 2. 业务处理
-	userType, err := logic.Logining(p)
+	userType, address, err := logic.Login(p)
 	if err != nil {
 		zap.L().Error("登录失败", zap.Error(err))
 		ResponseError(c, "登录失败")
 		return
 	}
-	ResponseSuccess(c, userType)
+
+	//3. 都正确则查询数据库,获取用户信息
+	user, err := mysql.GetUserByAddress(address)
+	fmt.Printf("%#v", user)
+	userId := user.UserID
+	fmt.Println(userId)
+	if err != nil {
+		fmt.Println("查询用户信息失败", err)
+		ResponseError(c, "查询用户信息失败")
+	}
+
+	// 生成Token
+	tokenString, _ := jwt.GenToken(user.UserID, user.Address)
+
+	// 返回响应
+	ResponseSuccess(c, map[string]interface{}{
+		"userType": userType,
+		"token":    tokenString,
+	})
+
 }
