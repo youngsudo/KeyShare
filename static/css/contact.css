@@ -1,0 +1,14 @@
+#contact_but_big_div{
+    display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+#contact_but_input{
+    width: 80%;
+    height: 30px;
+    background-color: #16a9ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    text-align:center;
+}

@@ -2,9 +2,12 @@ package logic
 
 import (
 	"app/dao/mysql"
+	"app/dao/redis"
 	"app/eth"
 	"app/models"
 	bip "app/pkg/bip39"
+	"app/pkg/email"
+	"app/pkg/pass"
 	"app/pkg/password"
 	"app/pkg/snowflake"
 	"app/setting"
@@ -23,10 +26,21 @@ var (
 	ErrorAesCtrPass        = errors.New("加密出错了")
 	ErrorLogin             = errors.New("登陆失败")
 	ErrorAccountPassword   = errors.New("账号或密码错误")
+	ErrorVerifyCode        = errors.New("验证码错误")
 )
 
 // 注册
 func SignUp(p *models.ParamSignUp) error {
+	// 判断验证码是否正确
+	// 获取验证码
+	verify, err := redis.GetVerify(p.Email)
+	if err != nil {
+		return err
+	}
+	if verify != p.VerifyCode {
+		fmt.Println(verify, p.VerifyCode)
+		return ErrorVerifyCode
+	}
 
 	// 1.加载管理员账户
 	opts, err := eth.GetOpts(setting.Conf.ETHConfig.PrivateKey)
@@ -70,8 +84,6 @@ func SignUp(p *models.ParamSignUp) error {
 	} else if b {
 		return ErrorIsExitUserEmail
 	}
-	zap.L().Debug("邮箱不存在")
-	fmt.Println("邮箱不存在")
 	// 2. 生成用户ID
 	userID := snowflake.GenID()
 	zap.L().Debug("userID", zap.Int64("userID", userID))
@@ -148,7 +160,7 @@ func SignUp(p *models.ParamSignUp) error {
 	zap.L().Info("添加一个用户", zap.String("address", p.Address), zap.String("tx", tx.Hash().Hex()))
 
 	// 4. 将用户信息写入数据库
-	key := "1234567887654321"                                                   // 加密私钥                                               // 密钥
+	key := "1234567887654321"                                                   // 加密私钥  // 密钥
 	encryptData, err := password.AesCtrEncrypt([]byte(privateKey), []byte(key)) //加密 []bytes
 	if err != nil {
 		return ErrorAesCtrPass
@@ -166,7 +178,6 @@ func SignUp(p *models.ParamSignUp) error {
 // 登陆
 func Login(p *models.ParamLogin) (uint8, string, error) {
 	zap.L().Debug("登陆", zap.String("account", p.Account), zap.String("password", p.Password))
-	fmt.Println("登陆", p.Account, p.Password)
 	re := regexp.MustCompile("^0x[0-9a-fA-F]{40}$") // 正则表达式
 
 	var _address string
@@ -194,4 +205,28 @@ func Login(p *models.ParamLogin) (uint8, string, error) {
 	}
 	// fmt.Println(userType, address)
 	return userType, address, nil
+}
+
+// 联系我们
+func ContactUS(p *models.ParamContract) (err error) {
+	zap.L().Debug("联系我们", zap.String("name", p.Name), zap.String("email", p.Email), zap.String("Address", p.Address), zap.String("message", p.Message))
+
+	// 发送邮件
+	_email := setting.Conf.EmailConfig
+	header := "联系我们"
+	body := fmt.Sprintf("姓名:%s<br>邮箱:%s<br>地址:%s<br>留言:%s", p.Name, p.Email, p.Address, p.Message)
+	err = email.SendMailByGomail(_email.FromEmail, _email.FromEmail, _email.Password, _email.EmCilent, header, _email.EmPort, &body)
+	return
+}
+
+// 发送邮件 验证码
+func SendVerify(e string) (code string, err error) {
+	zap.L().Debug("发送邮件验证码", zap.String("email", e))
+	// 发送邮件
+	_email := setting.Conf.EmailConfig
+	header := "验证码"
+	code = pass.GetRandomString(4)
+	body := fmt.Sprintf("您的验证码为:%s,有效时间为60s", code)
+	err = email.SendMailByGomail(_email.FromEmail, e, _email.Password, _email.EmCilent, header, _email.EmPort, &body)
+	return code, err
 }

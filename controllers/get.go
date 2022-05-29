@@ -9,17 +9,12 @@ import (
 
 // 首页
 func GetIndexHandler(c *gin.Context) {
+
 	userID, err := getCurrentUser(c)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println("userID------>", userID)
-
-	addr, ok := c.Get("account")
-	if !ok {
-		fmt.Println(err)
-	}
-	fmt.Println("Account:------->", addr)
 
 	c.HTML(http.StatusOK, "index.html", gin.H{})
 }
@@ -35,4 +30,25 @@ func GetRegisterHandler(c *gin.Context) {
 }
 func GetRegisterToAddressHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "registerByAddress.html", gin.H{})
+}
+
+// key 钥匙
+func GetKeyHandler(c *gin.Context) {
+	c.HTML(http.StatusOK, "key.html", gin.H{})
+}
+
+// 个人中心
+func GetInformationHandler(c *gin.Context) {
+	// 获取当前用户的信息
+	c.HTML(http.StatusOK, "information.html", gin.H{})
+}
+
+// 联系我们
+func GetContactUsHandler(c *gin.Context) {
+	c.HTML(http.StatusOK, "contact.html", gin.H{})
+}
+
+// 忘记密码
+func GetForgetPasswordHandler(c *gin.Context) {
+	c.HTML(http.StatusOK, "forgetPassword.html", gin.H{})
 }

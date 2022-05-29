@@ -3,6 +3,7 @@ package main
 import (
 	"app/controllers"
 	"app/dao/mysql"
+	"app/dao/redis"
 	"app/eth"
 	"app/logger"
 	"app/pkg/keystore"
@@ -44,12 +45,12 @@ func main() {
 	zap.L().Debug("初始化 MySQL 完成")
 	defer mysql.Close()
 
-	// // 4. 初始化Redis连接
-	// if err := redis.Init(setting.Conf.RedisConfig); err != nil {
-	// 	zap.L().Fatal("初始化Redis失败", zap.Error(err))
-	// }
-	// zap.L().Debug("初始化 Redis 完成")
-	// defer redis.Close()
+	// 4. 初始化Redis连接
+	if err := redis.Init(setting.Conf.RedisConfig); err != nil {
+		zap.L().Fatal("初始化Redis失败", zap.Error(err))
+	}
+	zap.L().Debug("初始化 Redis 完成")
+	defer redis.Close()
 
 	// 5.雪花算法
 	if err := snowflake.Init(setting.Conf.App.StartTime, setting.Conf.App.MachineID); err != nil {

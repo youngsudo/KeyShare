@@ -1374,7 +1374,7 @@ form .picker__day.picker__day--today {
 
 .login [type="checkbox"]:checked + label::before {
 	border-right: 2px solid #f6383e;
-border-bottom: 2px solid #f6383e;
+	border-bottom: 2px solid #f6383e;
 }
 
 .login .button {
@@ -1401,6 +1401,11 @@ border-bottom: 2px solid #f6383e;
 	background: #dd4b39;
 }
 
+#loginOther {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
 /*===================
 	register
 ===================*/

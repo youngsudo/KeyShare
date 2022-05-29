@@ -3,6 +3,7 @@ package routes
 import (
 	"app/controllers"
 	"app/logger"
+	"app/middlewares"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,20 +20,29 @@ func Setup(mode string) *gin.Engine {
 	r.LoadHTMLGlob("templates/*")
 
 	// 路由组
-	r.GET("/api/v1/login", controllers.GetLoginHandler)
-	r.GET("/api/v1/register", controllers.GetRegisterHandler)
-	r.GET("/api/v1/registerToAddress", controllers.GetRegisterToAddressHandler)
+	login := r.Group("/api/v1") // 不需要鉴权的路由
+	{
+		login.GET("/login", controllers.GetLoginHandler)
+		login.GET("/register", controllers.GetRegisterHandler)
+		login.GET("/registerToAddress", controllers.GetRegisterToAddressHandler)
+		login.GET("/forgotPassword", controllers.GetForgetPasswordHandler) // 忘记密码
 
-	// app := r.Group("/api/v1", middlewares.JWTAuthMiddleware())
-	app := r.Group("/api/v1")
+		login.POST("/login", controllers.LoginHandler)
+		login.POST("/register", controllers.SignUpHandler)
+		login.POST("/sendVerifyCode", controllers.SendVerifyCodeHandler)
+	}
+
+	app := r.Group("/api/v1", middlewares.CookieMiddlewares()) // 需要鉴权的路由
 	{
 		app.GET("/", controllers.GetIndexHandler)
-		app.GET("/index", controllers.GetIndexHandler)
+		app.GET("/index", controllers.GetIndexHandler)             // 首页
+		app.GET("/key", controllers.GetKeyHandler)                 // key 钥匙
+		app.GET("/information", controllers.GetInformationHandler) // 个人中心
+		app.GET("/contact", controllers.GetContactUsHandler)       // 联系我们
 	}
 
 	{
-		app.POST("/register", controllers.SignUpHandler)
-		app.POST("/login", controllers.LoginHandler)
+		app.POST("/contact", controllers.ContactHandler)
 	}
 
 	return r

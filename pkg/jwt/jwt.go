@@ -4,8 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/spf13/viper"
-
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -16,20 +14,18 @@ var mySecret = []byte("区块链") // 加盐
 // 我们这里需要额外记录一个username字段，所以要自定义结构体
 // 如果想要保存更多信息，都可以添加到这个结构体中
 type MyClaims struct {
-	UserID  int64  `json:"user_id"`
-	Account string `json:"account"`
+	UserID int64 `json:"user_id"`
 	jwt.StandardClaims
 }
 
 // GenToken 生成JWT
-func GenToken(userID int64, account string) (string, error) {
+func GenToken(userID int64) (string, error) {
 	// 创建一个我们自己的声明的数据
 	c := MyClaims{
-		userID,
-		account, // 自定义字段
+		userID, // 自定义字段
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(
-				time.Duration(viper.GetInt("auth.jwt_expire")) * time.Hour).Unix(), // 过期时间
+				1 * time.Hour).Unix(), // 过期时间
 			Issuer: "young", // 签发人
 		},
 	}

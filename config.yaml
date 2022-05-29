@@ -30,10 +30,14 @@ redis:
 
 eth:
   ethclient: "HTTP://127.0.0.1:7545"
-  contract: "0x17Fc3153364EE990047f51307a0c06D76b648E08"
-  admin: "0x18e823751823cf6e0e0Ec0b321104Ce5529246CF"
-  privateKey: "239bd14d6f62d922ccd18db83360415e9486306c05d4727c1eee1755e3378d92"
+  contract: "0xfABCcb25E13Eb6aE1b280639710eAFf09dd31205"
+  privateKey: "144f16df42a2288b1ee401889f6a20d2e94296d274b73bfb294f985da4a7bcbe"
   keystore_name: ""
   give_eth: true
   give_num: 10  # ETH
   
+email:
+  from_email: "youngsudotest@163.com"
+  pass_word: "YZUOSPJUOSQUZFJJ"
+  em_client: "smtp.163.com" # 邮件服务器地址
+  em_port: 25  # 端口号

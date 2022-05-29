@@ -1,15 +1,14 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-
 <head>
 	<meta charset="UTF-8">
 	<title>Key Share</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1  maximum-scale=1 user-scalable=no">
 	<meta name="mobile-web-app-capable" content="yes">
 	<meta name="HandheldFriendly" content="True">
-
+	
 	<link rel="shortcut icon" href="/static/img/favicon.ico">
-
+	
 	<link rel="stylesheet" href="/static/css/font-awesome.min.css">
 	<link rel="stylesheet" href="/static/css/materialize.min.css">
 	<link rel="stylesheet" href="/static/css/slick.css">
@@ -19,9 +18,8 @@
 	<link rel="stylesheet" href="/static/css/owl.transitions.css">
 	<link rel="stylesheet" href="/static/css/lightbox.min.css">
 	<link rel="stylesheet" href="/static/css/style.css">
-
+	
 </head>
-
 <body>
 
 	<!-- navbar -->
@@ -31,67 +29,79 @@
 				<a href="#" data-activates="slide-out-left" class="sidenav-control"><i class="fa fa-bars"></i></a>
 			</div>
 			<div class="site-title">
-				<a href="index" class="logo">
-					<h1>KeyShare</h1>
-				</a>
+				<a href="index.html" class="logo"><h1>KeyShare</h1></a>
 			</div>
 			<div class="panel-control-right">
-				<a href="#"><i class="fa fa-envelope"></i></a>
+				<a href="contact.html"><i class="fa fa-envelope"></i></a>
 			</div>
 		</div>
 	</div>
 	<!-- end navbar -->
 
+	
+		<!-- panel control -->
+		<div class="panel-control-left">
+			<ul id="slide-out-left" class="side-nav collapsible" data-collapsible="accordion">
+				<li>
+					<div class="photos">
+						<img src="/static/img/tx.jpeg" alt="">
+						<h3>用户名</h3>
+						<p>地址</p>
+					</div>
+				</li>
+				<li class="first-list">
+					<a href="index">首页</a>
+				</li>
+				<li>
+					<a href="key">我的钥匙</a>
+				</li>
+				<li>
+					<a href="shareKey">共享大厅</a>
+				</li>
+				<li>
+					<a href="addKey">添加钥匙</a>
+				</li>
+	
+				<li>
+					<a href="portfolio">文件夹</a>
+				</li>
+				<li>
+					<a href="information">个人中心</a>
+				</li>
+				<li>
+					<a href="contact">联系我们</a>
+				</li>
+				<li>
+					<a href="#">退出账号</a>
+				</li>
+			</ul>
+		</div>
+		<!-- end panel control -->
 
-	<!-- login-->
-	<div class="login app-pages app-section">
+	<!-- testimonial -->
+	<div class="testimonial app-pages">
 		<div class="container">
-			<div class="pages-title">
-				<h3>登陆</h3>
+			<div id="testimonial" class="owl-carousel owl-theme"> 
+				<div class="item">
+					<p>个人详情</p>
+					<img src="/static/img/testimonial1.png" alt="">
+					<h6>用户名</h6>
+					<strong>地址</strong>
+				</div>
 			</div>
-			<form action="#">
-				<!-- <div class="input-field">
-					<input id="email" type="email" class="validate">
-					<label for="email">邮箱</label>
-				</div> -->
-				<div class="input-field">
-					<input id="account" type="text" class="validate">
-					<label for="account">账号</label>
-				</div>
-				<div class="input-field">
-					<input id="password" type="password" class="validate">
-					<label for="password">密码</label>
-				</div>
-				<div><a href="" class="forgot">忘记密码?</a></div>
-				<div class="chebox">
-					<input type="checkbox" id="checkbox" />
-					<label for="checkbox">记住我</label>
-				</div>
-				<button id="login_btn" class="button">登陆</button>
-				<div id="loginOther">
-					<div class="create-account">还没有注册? <a href="register">创建账户</a></div>
-					<div class="create-account">忘记密码? <a href="forgotPassword">忘记密码</a></div>
-				</div>
-			</form>
-			<!-- <div class="or">
-				<h5>或者</h5>
-				<button id="login_type" ind="login" class="button" onclick="loginType(this)">使用地址登陆</button>
-			</div> -->
 		</div>
 	</div>
-	<!-- end login -->
-
+	<!-- end testimonial -->
+	
 	<!-- footer -->
 	<!-- end footer -->
-
+	
 	<!-- script -->
 	<script src="/static/js/jquery.min.js"></script>
 	<script src="/static/js/materialize.min.js"></script>
 	<script src="/static/js/slick.min.js"></script>
 	<script src="/static/js/owl.carousel.min.js"></script>
 	<script src="/static/js/custom.js"></script>
-	<script src="/static/js/login.js"></script>
 
 </body>
-
 </html>

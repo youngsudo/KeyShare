@@ -2,14 +2,12 @@ package pass
 
 import (
 	"math/rand"
+	"time"
 )
-
-// func main() {
-// 	fmt.Println(GetRandomString(8))
-// }
 
 //随机字符串
 func GetRandomString(n int) string {
+	rand.Seed(time.Now().UnixNano())
 	str := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	bytes := []byte(str)
 	var result []byte

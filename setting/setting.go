@@ -16,6 +16,7 @@ type AppConfig struct {
 	*MysqlConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
 	*ETHConfig   `mapstructure:"eth"`
+	*EmailConfig `mapstructure:"email"`
 }
 
 type App struct {
@@ -55,11 +56,17 @@ type RedisConfig struct {
 type ETHConfig struct {
 	Ethclient    string `mapstructure:"ethclient"`
 	Contract     string `mapstructure:"contract"`
-	Admin        string `mapstructure:"admin"`
 	PrivateKey   string `mapstructure:"privatekey"`
 	KeystoreName string `mapstructure:"keystore_name"`
 	GiveETH      bool   `mapstructure:"give_eth"`
 	GiveNum      int    `mapstructure:"give_num"`
+}
+
+type EmailConfig struct {
+	FromEmail string `mapstructure:"from_email"`
+	Password  string `mapstructure:"pass_word"`
+	EmCilent  string `mapstructure:"em_client"`
+	EmPort    int    `mapstructure:"em_port"`
 }
 
 func Init() error {

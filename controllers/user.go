@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"app/dao/mysql"
+	"app/dao/redis"
 	"app/logic"
 	"app/models"
 	"app/pkg/jwt"
@@ -11,6 +12,28 @@ import (
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 )
+
+// 发送验证码
+func SendVerifyCodeHandler(c *gin.Context) {
+	// 1. 获取参数和参数校验
+	var email = c.PostForm("email")
+	if email == "" {
+		ResponseError(c, "请输入邮箱")
+		return
+	}
+	// 2. 业务处理
+	code, err := logic.SendVerify(email)
+	if err != nil {
+		zap.L().Error("logic.SendVerifyCode failed", zap.Error(err))
+		ResponseError(c, err)
+		return
+	}
+	// 3. 存入缓存
+	fmt.Println(email, code)
+	redis.SetVerify(email, code)
+	// 4. 返回响应
+	ResponseSuccess(c, "发送成功")
+}
 
 // 注册
 func SignUpHandler(c *gin.Context) {
@@ -67,7 +90,7 @@ func LoginHandler(c *gin.Context) {
 
 	//3. 都正确则查询数据库,获取用户信息
 	user, err := mysql.GetUserByAddress(address)
-	fmt.Printf("%#v", user)
+	fmt.Printf("%#v\n", user)
 	userId := user.UserID
 	fmt.Println(userId)
 	if err != nil {
@@ -76,12 +99,43 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	// 生成Token
-	tokenString, _ := jwt.GenToken(user.UserID, user.Address)
+	tokenString, _ := jwt.GenToken(user.UserID)
+	// 使用 cookie
+	c.SetCookie("token", tokenString, 3600, "/", "localhost", false, true) // 3600 秒 = 1小时
 
 	// 返回响应
-	ResponseSuccess(c, map[string]interface{}{
+	// ResponseSuccess(c, map[string]interface{}{
+	// 	"userType": userType,
+	// 	"token":    tokenString,
+	// })
+	ResponseSuccess(c, gin.H{
 		"userType": userType,
-		"token":    tokenString,
 	})
+}
 
+// 联系我们
+func ContactHandler(c *gin.Context) {
+	// 1. 获取参数和参数校验
+	p := new(models.ParamContract)
+	if err := c.ShouldBindJSON(p); err != nil {
+		// 请求参数有误，直接返回响应
+		zap.L().Error("Contaxt with invalid param", zap.Error(err))
+		// 判断err是不是validator.ValidationErrors 类型
+		errs, ok := err.(validator.ValidationErrors)
+		if !ok {
+			ResponseError(c, "联系我们的请求参数错误")
+			return
+		}
+		ResponseError(c, removeTopStruct(errs.Translate(trans)))
+		return
+	}
+	fmt.Printf("%#v\n", p)
+	// 2. 业务处理
+	if err := logic.ContactUS(p); err != nil {
+		zap.L().Error("logic.ContactUS failed", zap.Error(err))
+		ResponseError(c, err)
+		return
+	}
+	// 3. 返回响应
+	ResponseSuccess(c, "发送成功")
 }

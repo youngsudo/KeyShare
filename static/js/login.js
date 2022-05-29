@@ -42,7 +42,7 @@ $(document).ready(function () {
             isCheck = true;
         }
 
-        console.log(account, password, isCheck)
+        console.log(account, password, isCheck);
         $.ajax({
             url: "/api/v1/login",
             type: "post",
@@ -52,47 +52,57 @@ $(document).ready(function () {
                 "password": password,
             }),
             success: function (res) {
-                // console.log(res)
-                // console.log(res.data.token)
-                // token Authorization
-                // 存储token
-                // sessionStorage.setItem("token", res.data.token);
-                // localStorage.setItem("token", JSON.stringify(res.data.token));
-                // localStorage.setItem("user_type", JSON.stringify(res.data.userType));
-                // 存储账号
-                // localStorage.setItem("account", account);
-                // 存储记住我
-                // localStorage.setItem("isCheck", isCheck);
-                // 跳转
-                window.location.href = "/api/v1/index";
-
+                console.log(res)
+                if (res.msg == "success") {
+                    // 存储token
+                    // localStorage.token = res.data.token;
+                    // window.sessionStorage.setItem("token", res.data.token);
+                    // 跳转到首页
+                    window.location.href = "/api/v1/index";
+                    // $.ajax({
+                    //     url: "/api/v1/index",
+                    //     type: "get",
+                    //     datType: "JSON",
+                    //     headers: {
+                    //         Authorization: `Bearer ` + localStorage.token //此处放置请求到的用户token,Bearer后面必选加上一个空格
+                    //     }
+                    // })
+                }
             }
         })
 
     })
 })
 
-// function loginType(i) {
-//     console.log(i.attributes.ind.value)
-//     if (i.attributes.ind.value == "login") {
-//         window.location.href = "/api/v1/loginToAddress";
-//     } else {
-//         window.location.href = "/api/v1/login";
-//     }
-// }
-
-// if($("#account").val().indexOf("@") != -1){
-//     // 判断邮箱格式
-//     let reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
-//     if(!reg.test($("#account").val())){
-//         alert("邮箱格式不正确");
-//         return;
-//     }
-// }else{
-//     // 判断手机号格式
-//     let reg = /^1[3-9]\d{9}$/;
-//     if(!reg.test($("#account").val())){
-//         alert("手机号格式不正确");
-//         return;
-//     }
-// }
+$(".a_index").on("click", function (event) {
+    event.preventDefault();//使a自带的方法失效，即无法调整到href中的URL
+    var url = '';   //请求的URl,接口
+    var xhr = new XMLHttpRequest();		//定义http请求对象
+    xhr.open("post", url, true);//根据接口使用请求方式
+    xhr.responseType = "blob";  // 返回类型blob
+    xhr.setRequestHeader("accessToken", "此处获取token");
+    xhr.setRequestHeader("Content-type", "application/application/octet-stream");
+    //定义请求完成的处理函数,请求前可以增加加载框/禁用下载按钮逻辑
+    xhr.onload = function () {
+        if (this.status === 200) {
+            //请求完成
+            var blob = this.response;
+            var reader = new FileReader();
+            reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a标签href
+            reader.onload = function (e) {
+                console.log(e);			//查看有没有接收到数据流
+                // 转换完成，创建一个a标签用于下载
+                var a = document.createElement('a');
+                a.download = '';			//此处填写文件地址
+                a.href = e.target.result;
+                $("body").append(a);    // 修复firefox中无法触发click
+                a.click();
+                $(a).remove();
+            }
+        }
+        else {
+            alert("出现了未知的错误!");
+        }
+    }
+    xhr.send();
+});

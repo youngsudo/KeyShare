@@ -20,7 +20,7 @@ $(document).ready(function () {
             }
         }
         // 助记词
-        if ($("#mnemonic").val() != ""){
+        if ($("#mnemonic").val() != "") {
             console.log($("#mnemonic").val())
         }
 
@@ -44,7 +44,7 @@ $(document).ready(function () {
         }
         // 如果输入的是邮箱
         if (/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test($("#email").val())) {
-            $("#email").val($("#email").val());
+            console.log($("#email").val());
         } else {
             alert("邮箱格式错误");
             return;
@@ -56,7 +56,7 @@ $(document).ready(function () {
             return;
         }
         if (/^[a-zA-Z0-9]{6,16}$/.test($("#password").val())) {
-            $("#password").val($("#password").val());
+            console.log($("#password").val());
         } else {
             alert("密码格式错误,密码长度为6-16位");
             return;
@@ -116,15 +116,26 @@ $(document).ready(function () {
             return;
         }
         // ajax 后台发送邮件
-        isVerify = true;
-        alert("验证码已发送到您的邮箱");
+        $.ajax({
+            url: "/api/v1/sendVerifyCode",
+            type: "post",
+            datType: "JSON",    // 返回的数据类型
+            data: {
+                "email": $("#email").val()
+            },
+            success: function (res) {
+                // console.log(res)
+                // console.log(res.msg)
+                if (res.msg == "success") {
+                    isVerify = true;
+                    alert("发送成功");
+                } else {
+                    alert("发送失败");
+                }
+            }
+        })
+        // alert("验证码已发送到您的邮箱");
     })
-
-    // $("#register_type").click((i) => {
-    //     alert(1)
-    //     console.log(i)
-    // })
-
 })
 function registerType(i) {
     // console.log(i)

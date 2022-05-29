@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Key Share</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1  maximum-scale=1 user-scalable=no">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="HandheldFriendly" content="True">
+
+	<link rel="shortcut icon" href="img/favicon.png">
+
+	<link rel="stylesheet" href="css/font-awesome.min.css">
+	<link rel="stylesheet" href="css/materialize.min.css">
+	<link rel="stylesheet" href="css/slick.css">
+	<link rel="stylesheet" href="css/slick-theme.css">
+	<link rel="stylesheet" href="css/owl.carousel.css">
+	<link rel="stylesheet" href="css/owl.theme.css">
+	<link rel="stylesheet" href="css/owl.transitions.css">
+	<link rel="stylesheet" href="css/lightbox.min.css">
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/addKey.css">
+
+</head>
+
+<body>
+
+	<!-- navbar -->
+	<div class="navbar">
+		<div class="container">
+			<div class="panel-control-left">
+				<a href="#" data-activates="slide-out-left" class="sidenav-control"><i class="fa fa-bars"></i></a>
+			</div>
+			<div class="site-title">
+				<a href="index.html" class="logo">
+					<h1>KeyShare</h1>
+				</a>
+			</div>
+			<div class="panel-control-right">
+				<a href="contact.html"><i class="fa fa-envelope"></i></a>
+			</div>
+		</div>
+	</div>
+	<!-- end navbar -->
+
+<!-- panel control -->
+<div class="panel-control-left">
+	<ul id="slide-out-left" class="side-nav collapsible"  data-collapsible="accordion">
+		<li>
+			<div class="photos">
+				<img src="img/tx.jpeg" alt="">
+				<h3>用户名</h3>
+			</div>
+		</li>
+		<li class="first-list">
+			<a href="index.html">家</a>
+		</li>
+		<li>
+			<a href="shareKey.html">共享大厅</a>
+		</li>
+		<li>
+			<a href="portfolio.html">文件夹</a>
+		</li>
+		<li>
+			<a href="key.html">钥匙</a>
+		</li>
+		<li>
+			<a href="information.html">我的信息</a>
+		</li>
+		<li>
+			<a href="contact.html">联系我们</a>
+		</li>
+		<li>
+			<a href="login.html">登陆</a>
+		</li>
+		<li>
+			<a href="register.html">注册</a>
+		</li>
+		<li>
+			<a href="addKey.html">添加账号</a>
+		</li>
+		<li>
+			<a href="#">退出账号</a>
+		</li>
+	</ul>
+</div>
+<!-- end panel control -->
+
+	<div class="contact app-pages app-section">
+		<div class="container">
+			<div class="pages-title">
+				<h3>添加账号密码</h3>
+			</div>
+			<form action="#">
+				<div class="input-field">
+					<input id="classify" type="text" class="validate">
+					<label for="classify">分类</label>
+				</div>
+				<div class="input-field">
+					<input id="key" type="text" class="validate">
+					<label for="key">账号</label>
+				</div>
+				<div class="input-field" id="eyePass">
+					<input id="password" type="password" class="validate">
+					<label for="key">密码</label>
+					<div id="showEye" >
+						<!-- <i class="fa fa-eye" aria-hidden="true"></i>  -->
+						<i class="fa fa-eye-slash" aria-hidden="false"></i>
+					</div>
+				</div>
+				<!-- <button class="button">Submit</button> -->
+				<input type="submit" style="width:100%;
+                height: 30px;text-align: 30px;
+                color: white;
+                background-color: rgb(202, 29, 29);
+                border: 0;
+                border-radius: 5px;
+                ">
+			</form>
+		</div>
+	</div>
+
+	<div>
+
+	</div>
+	<div id="createPass" class="contact app-pages app-section">
+		<div class="container">
+			<p style="font-size: 26px; color: blue; text-align: center;">随机生成密码</p>
+
+			<div class="container">
+				<div class="input-field">
+					<p>生成密码长度:&nbsp;<span id="text-plength" style="font-size: 16px; color: black;">8</span></p>
+					<!-- <input type="range" id="range" value="8" min="4" max="20" step="1" onchange="changeV()"> -->
+					<input id="slider" type="range" min="4" max="32" value="8" step="1" onchange="changeV()" />
+				</div>
+			</div>
+			<div id="Checkbox">
+				<div>
+					<div>
+						<div class="chebox">
+							<input type="checkbox" id="number" name="plevel" checked />
+							<label for="number" style="font-size: 12px; color: red;">包含数字</label>
+						</div>
+						<div class="chebox">
+							<input type="checkbox" id="lowercase" name="plevel" checked />
+							<label for="lowercase" style="font-size: 12px; color: black;">包含小写</label>
+						</div>
+						<div class="chebox">
+							<input type="checkbox" id="uppercase" name="plevel" checked />
+							<label for="uppercase" style="font-size: 12px; color: black;">包含大写</label>
+						</div>
+						<div class="chebox">
+							<input type="checkbox" id="symbol" name="plevel" />
+							<label for="symbol" style="font-size: 12px; color: black;">包含符号</label>
+						</div>
+					</div>
+				</div>
+				<div id="flex_big_div">
+					<div id="flex_but_div">
+						<button class="btn" data-clipboard-action="copy" data-clipboard-target="#pass_text">
+							复制
+						</button>
+					</div>
+					<div>
+						<input type="text" id="pass_text" placeholder="生成密码" value="" style="text-align: center;">
+					</div>
+					<input type="button" id="generate" value="生成密码" style="width:100%;
+                height: 30px;text-align: 30px;
+                color: white;
+                background-color: rgb(202, 29, 29);
+                border: 0;
+                border-radius: 5px;">
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+
+	<!-- script -->
+	<script src="js/jquery.min.js"></script>
+	<script src="js/materialize.min.js"></script>
+	<script src="js/slick.min.js"></script>
+	<script src="js/owl.carousel.min.js"></script>
+	<script src="js/custom.js"></script>
+	<script src="js/clipboard.min.js"></script>
+	<script src="js/addKey.js"></script>
+
+</body>
+
+</html>
