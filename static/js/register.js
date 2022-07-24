@@ -94,8 +94,8 @@ $(document).ready(function () {
                 "re_password": $("#repassword").val(),
                 "verifyCode": $("#verify").val()
             }),
-            success: function (data) {
-                console.log(data)
+            success: function (res) {
+                console.log(res)
                 alert("注册成功");
             }
         })

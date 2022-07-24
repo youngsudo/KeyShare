@@ -9,13 +9,6 @@ import (
 
 // 首页
 func GetIndexHandler(c *gin.Context) {
-
-	userID, err := getCurrentUser(c)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("userID------>", userID)
-
 	c.HTML(http.StatusOK, "index.html", gin.H{})
 }
 
@@ -51,4 +44,14 @@ func GetContactUsHandler(c *gin.Context) {
 // 忘记密码
 func GetForgetPasswordHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "forgetPassword.html", gin.H{})
+}
+
+//  返回用户信息的路由
+func GetUserInformationHandler(c *gin.Context) {
+	user, err := GetUserInformation(c)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(user)
+	c.JSON(http.StatusOK, user)
 }

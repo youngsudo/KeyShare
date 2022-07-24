@@ -3,21 +3,26 @@ package middlewares
 import (
 	"app/controllers"
 	"app/pkg/jwt"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func CookieMiddlewares() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		cookie, err := c.Cookie("token")
 		if err != nil {
-			fmt.Printf("cookie err:%#v", err)
-			controllers.ResponseError(c, "cookie err")
+			zap.L().Info("cookie err", zap.Error(err))
+			controllers.ResponseError(c, "无效的Token")
+			// c.JSON(http.StatusUnauthorized, controllers.ErrorUserNotLogin)
+			c.Abort()
+			return
 		}
 		mc, err := jwt.ParseToken(cookie)
 		if err != nil {
+			zap.L().Info("cookie err", zap.Error(err))
 			controllers.ResponseError(c, "无效的Token")
+			// c.Redirect(http.StatusMovedPermanently, "/api/v1/login")
 			c.Abort()
 			return
 		}

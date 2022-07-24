@@ -19,13 +19,13 @@ type MyClaims struct {
 }
 
 // GenToken 生成JWT
-func GenToken(userID int64) (string, error) {
+func GenToken(userID int64, Expiration_time time.Duration) (string, error) {
 	// 创建一个我们自己的声明的数据
 	c := MyClaims{
 		userID, // 自定义字段
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(
-				1 * time.Hour).Unix(), // 过期时间
+				Expiration_time * time.Minute).Unix(), // 过期时间 分钟
 			Issuer: "young", // 签发人
 		},
 	}

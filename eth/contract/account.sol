@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./conf.sol";
 
-contract AccountClass{
+contract Account{
 
 // string 分类数组
 // string[] private accountTypeList; // 存储分类结构体的数组

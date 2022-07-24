@@ -52,3 +52,36 @@ func GetUserByAddress(address string) (user *models.DBUser, err error) {
 	// fmt.Printf("User:%v\n", u)
 	return &u, nil
 }
+
+func GetUserByUserId(userId int64) (user *models.DBUser, err error) {
+	sqlStr := `select * from tab_user where user_id = ?;`
+	//执行 SQL 语句
+	var u models.DBUser
+	err = db.Get(&u, sqlStr, userId)
+	if err != nil {
+		fmt.Printf("get failed, err:%v\n", err)
+		return
+	}
+	// fmt.Printf("User:%v\n", u)
+	return &u, nil
+}
+
+func GetUserByUserIdOrAddress(s interface{}) (user *models.DBUser, err error) {
+
+	var sqlStr string
+	switch s.(type) {
+	case int64:
+		sqlStr = `select * from tab_user where user_id = ?;`
+	case string:
+		sqlStr = `select * from tab_user where address = ?;`
+	}
+	//执行 SQL 语句
+	var u models.DBUser
+	err = db.Get(&u, sqlStr, s)
+	if err != nil {
+		fmt.Printf("get failed, err:%v\n", err)
+		return
+	}
+	// fmt.Printf("User:%v\n", u)
+	return &u, nil
+}

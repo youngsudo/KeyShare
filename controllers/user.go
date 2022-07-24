@@ -6,6 +6,7 @@ import (
 	"app/logic"
 	"app/models"
 	"app/pkg/jwt"
+	"app/setting"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -29,7 +30,7 @@ func SendVerifyCodeHandler(c *gin.Context) {
 		return
 	}
 	// 3. 存入缓存
-	fmt.Println(email, code)
+	fmt.Println("发送验证码:", email, code)
 	redis.SetVerify(email, code)
 	// 4. 返回响应
 	ResponseSuccess(c, "发送成功")
@@ -89,8 +90,8 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	//3. 都正确则查询数据库,获取用户信息
-	user, err := mysql.GetUserByAddress(address)
-	fmt.Printf("%#v\n", user)
+	user, err := mysql.GetUserByUserIdOrAddress(address)
+	fmt.Printf("=====>%#v\n", user)
 	userId := user.UserID
 	fmt.Println(userId)
 	if err != nil {
@@ -98,10 +99,16 @@ func LoginHandler(c *gin.Context) {
 		ResponseError(c, "查询用户信息失败")
 	}
 
+	// 存入缓存
+	err = redis.SetUser(userId, user)
+	if err != nil {
+		zap.L().Error("redis.SetUser failed", zap.Error(err))
+	}
+
 	// 生成Token
-	tokenString, _ := jwt.GenToken(user.UserID)
+	tokenString, _ := jwt.GenToken(user.UserID, setting.Conf.TokenExpiration)
 	// 使用 cookie
-	c.SetCookie("token", tokenString, 3600, "/", "localhost", false, true) // 3600 秒 = 1小时
+	// c.SetCookie("token", tokenString, 3600, "/", "localhost", false, true) // 3600 秒 = 1小时
 
 	// 返回响应
 	// ResponseSuccess(c, map[string]interface{}{
@@ -110,6 +117,7 @@ func LoginHandler(c *gin.Context) {
 	// })
 	ResponseSuccess(c, gin.H{
 		"userType": userType,
+		"token":    tokenString,
 	})
 }
 

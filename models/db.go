@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type DBUser struct {
 	ID         int       `db:"id"`
@@ -11,4 +14,9 @@ type DBUser struct {
 	Password   string    `db:"password"`
 	PrivateKey string    `db:"privatekey"`
 	Time       time.Time `db:"time"`
+}
+
+func (u DBUser) MarshalBinary() ([]byte, error) {
+	bytes, err := json.Marshal(u)
+	return bytes, err
 }

@@ -4,6 +4,7 @@ app:
   port: 8080
   start_time: "2022-05-19"
   machine_id: 1
+  token_expiration: 60 # jwt token 过期时间，单位 分钟
 
 log:
   level: "debug"
@@ -30,8 +31,8 @@ redis:
 
 eth:
   ethclient: "HTTP://127.0.0.1:7545"
-  contract: "0xfABCcb25E13Eb6aE1b280639710eAFf09dd31205"
-  privateKey: "144f16df42a2288b1ee401889f6a20d2e94296d274b73bfb294f985da4a7bcbe"
+  contract: "0xDB1C25C927e6A34b17E812871CA2F25483dCAdbD"
+  privateKey: "fc803dccc18bf7fd88fbe3ed007293f84233571e83d35cb8329b23a2941fcf5b"
   keystore_name: ""
   give_eth: true
   give_num: 10  # ETH

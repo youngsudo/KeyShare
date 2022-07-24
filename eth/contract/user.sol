@@ -121,14 +121,14 @@ function isAdminFunc(address _addr) public view returns (bool) {
 }
 
 // 判断用户地址是否存在(是否已经注册)
-function isExitUserAddressFunc(address _userAddress) public view returns(bool) {
-       return userStructMap[_userAddress].exist;    
+function isExitUserAddressFunc(address _address) public view returns(bool) {
+       return userStructMap[_address].exist;    
 }
 
 // 判断 用户账号 是否存在
-function isExitUserAccountFunc(string memory _userAddress) public view returns(bool) {
+function isExitUserAccountFunc(string memory _account) public view returns(bool) {
     // accountMap => account => userStructMap{} => exist
-    return userStructMap[accountMap[_userAddress]].exist;
+    return userStructMap[accountMap[_account]].exist;
     
 }
 // 判断 用户邮箱 是否存在

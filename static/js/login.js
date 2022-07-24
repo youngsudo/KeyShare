@@ -43,34 +43,24 @@ $(document).ready(function () {
         }
 
         console.log(account, password, isCheck);
-        $.ajax({
-            url: "/api/v1/login",
-            type: "post",
-            datType: "JSON",
-            data: JSON.stringify({
-                "account": account,
-                "password": password,
-            }),
-            success: function (res) {
-                console.log(res)
-                if (res.msg == "success") {
-                    // 存储token
-                    // localStorage.token = res.data.token;
-                    // window.sessionStorage.setItem("token", res.data.token);
-                    // 跳转到首页
-                    window.location.href = "/api/v1/index";
-                    // $.ajax({
-                    //     url: "/api/v1/index",
-                    //     type: "get",
-                    //     datType: "JSON",
-                    //     headers: {
-                    //         Authorization: `Bearer ` + localStorage.token //此处放置请求到的用户token,Bearer后面必选加上一个空格
-                    //     }
-                    // })
-                }
-            }
-        })
 
+        ajaxResponse("/api/v1/login", "post", JSON.stringify({
+            "account": account,
+            "password": password,
+        }),
+        function (res) {
+            if (res.msg == "success") {
+                // 存储token
+                localStorage.token = res.data.token;
+                // window.sessionStorage.setItem("token", res.data.token);
+                // 跳转到首页
+                alert("登录成功");
+                    window.location.href = "/api/v1/index";
+            }
+            else{
+                alert(res.msg);
+            }
+        });
     })
 })
 

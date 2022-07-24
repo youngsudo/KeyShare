@@ -2,6 +2,7 @@ package setting
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -20,11 +21,12 @@ type AppConfig struct {
 }
 
 type App struct {
-	Name      string `mapstructure:"name"`
-	Mode      string `mapstructure:"mode"`
-	Port      int    `mapstructure:"port"`
-	StartTime string `mapstructure:"start_time"`
-	MachineID int64  `mapstructure:"machine_id"`
+	Name            string        `mapstructure:"name"`
+	Mode            string        `mapstructure:"mode"`
+	Port            int           `mapstructure:"port"`
+	StartTime       string        `mapstructure:"start_time"`
+	MachineID       int64         `mapstructure:"machine_id"`
+	TokenExpiration time.Duration `mapstructure:"token_expiration"`
 }
 
 type LogConfig struct {
