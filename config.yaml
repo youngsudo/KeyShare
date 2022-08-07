@@ -2,6 +2,8 @@ app:
   name: "web_app"
   mode: "dev"
   port: 8080
+  width: 393
+  height: 851
   start_time: "2022-05-19"
   machine_id: 1
   token_expiration: 60 # jwt token 过期时间，单位 分钟

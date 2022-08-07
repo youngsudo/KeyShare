@@ -24,6 +24,8 @@ type App struct {
 	Name            string        `mapstructure:"name"`
 	Mode            string        `mapstructure:"mode"`
 	Port            int           `mapstructure:"port"`
+	Width           int           `mapstructure:"width"`
+	Height          int           `mapstructure:"height"`
 	StartTime       string        `mapstructure:"start_time"`
 	MachineID       int64         `mapstructure:"machine_id"`
 	TokenExpiration time.Duration `mapstructure:"token_expiration"`

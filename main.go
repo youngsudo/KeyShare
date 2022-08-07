@@ -16,9 +16,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
+	"github.com/zserge/lorca"
 	"go.uber.org/zap"
 )
 
@@ -89,18 +91,35 @@ func main() {
 		Addr:    fmt.Sprintf(":%d", port),
 		Handler: r,
 	}
-
+	// 开启一个goroutine启动服务
 	go func() {
-		// 开启一个goroutine启动服务
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			zap.L().Fatal("ListenAndServe", zap.Error(err))
 		}
 	}()
 
+	// 启动浏览器
+	ui, err := lorca.New("", "", setting.Conf.App.Width, setting.Conf.App.Height)
+	if err != nil {
+		zap.L().Fatal("启动浏览器失败,local 错误", zap.Error(err))
+	}
+	err = ui.Load("http://127.0.0.1:" + strconv.Itoa(setting.Conf.App.Port) + "/api/v1/login")
+	if err != nil {
+		zap.L().Fatal("加载页面失败", zap.Error(err))
+	}
+	defer ui.Close() // 在程序退出前关闭窗口
+
+	// 等待中断信号
+
 	// 等待中断信号来优雅地关闭服务器，为关闭服务器操作设置一个5秒的超时
 	quit := make(chan os.Signal, 1)                      // 创建一个接收信号的通道
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM) // 此处不会阻塞
-	<-quit                                               // 阻塞在此，当接收到上述两种信号时才会往下执行
+	// <-quit                                               // 阻塞在此，当接收到上述两种信号时才会往下执行
+	select {
+	case <-quit:
+	case <-ui.Done():
+	}
+
 	zap.L().Info("Shutdown Server ...")
 	// 创建一个5秒超时的context
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

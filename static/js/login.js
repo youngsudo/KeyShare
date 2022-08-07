@@ -43,26 +43,27 @@ $(document).ready(function () {
         }
 
         console.log(account, password, isCheck);
-
         ajaxResponse("/api/v1/login", "post", JSON.stringify({
             "account": account,
             "password": password,
         }),
-        function (res) {
-            console.log(res);
-            if (res.msg == "success") {
-                // 存储token
-                localStorage.token = res.data.token;
-                localStorage.id = res.data.id;
-                // window.sessionStorage.setItem("token", res.data.token);
-                // 跳转到首页
-                alert("登录成功");
-                    window.location.href = "/api/v1/index?id=" + window.localStorage.id;
-            }
-            else{
-                alert(res.msg);
-            }
-        });
+            function (res) {
+                console.log(res);
+                if (res.msg == "success") {
+                    // 存储token
+                    localStorage.token = res.data.token;
+                    localStorage.id = res.data.id;
+                    // window.sessionStorage.setItem("token", res.data.token);
+                    // 跳转到首页
+                    alert("登录成功");
+                    setTimeout(() => {
+                        window.location.href = "/api/v1/index?id=" + window.localStorage.id;
+                    }, 1000);
+                }
+                else {
+                    alert(res.msg);
+                }
+            });
     })
 })
 
