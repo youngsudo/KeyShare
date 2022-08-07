@@ -106,7 +106,7 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	// 生成Token
-	tokenString, _ := jwt.GenToken(user.UserID, setting.Conf.TokenExpiration)
+	tokenString, _ := jwt.GenToken(userId, setting.Conf.TokenExpiration)
 	// 使用 cookie
 	// c.SetCookie("token", tokenString, 3600, "/", "localhost", false, true) // 3600 秒 = 1小时
 
@@ -117,6 +117,7 @@ func LoginHandler(c *gin.Context) {
 	// })
 	ResponseSuccess(c, gin.H{
 		"userType": userType,
+		"id":       userId,
 		"token":    tokenString,
 	})
 }

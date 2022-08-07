@@ -20,7 +20,7 @@ func SetUser(userId int64, user *models.DBUser) (err error) {
 		zap.L().Warn("MarshalBinary failed", zap.Error(err))
 	}
 	fmt.Println("===========================\nredis TokenExpiration:", setting.Conf.TokenExpiration)
-	err = rdb.Set(fmt.Sprintf("%v", userId), userbyte, setting.Conf.TokenExpiration*time.Minute).Err()
+	err = rdb.Set(fmt.Sprintf("token:%v", userId), userbyte, setting.Conf.TokenExpiration*time.Minute).Err()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -31,7 +31,7 @@ func GetUserById(userId int64) (user *models.DBUser, err error) {
 	// rdb.HGetAll()
 	// rdb.HMGet()
 	// rdb.HGet()
-	s, err := rdb.Get(fmt.Sprintf("%v", userId)).Result()
+	s, err := rdb.Get(fmt.Sprintf("token:%v", userId)).Result()
 	if err == redis.Nil {
 		zap.L().Error("email verify does not exist", zap.Error(err))
 		return nil, ErrorNotData

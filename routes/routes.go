@@ -4,8 +4,6 @@ import (
 	"app/controllers"
 	"app/logger"
 
-	"app/middlewares"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,7 +26,7 @@ func Setup(mode string) *gin.Engine {
 		app.GET("/registerToAddress", controllers.GetRegisterToAddressHandler)
 		app.GET("/forgotPassword", controllers.GetForgetPasswordHandler) // 忘记密码
 
-		app.GET("/userInformation", middlewares.JWTAuthMiddleware(), controllers.GetUserInformationHandler) // 获取用户信息
+		// app.GET("/userInformation", middlewares.JWTAuthMiddleware(), controllers.GetUserInformationHandler) // 获取用户信息
 
 		app.GET("/", controllers.GetIndexHandler)
 		app.GET("/index", controllers.GetIndexHandler)             // 首页

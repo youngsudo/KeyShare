@@ -53,5 +53,11 @@ func GetUserInformationHandler(c *gin.Context) {
 		fmt.Println(err)
 	}
 	fmt.Println(user)
-	c.JSON(http.StatusOK, user)
+	fmt.Println(user.ID)
+	fmt.Println(user.ID == 0)
+	if user.ID == 0 {
+		c.Redirect(http.StatusMovedPermanently, "/api/v1/login") // 跳转到登陆页面
+	} else {
+		c.JSON(http.StatusOK, user)
+	}
 }

@@ -49,13 +49,15 @@ $(document).ready(function () {
             "password": password,
         }),
         function (res) {
+            console.log(res);
             if (res.msg == "success") {
                 // 存储token
                 localStorage.token = res.data.token;
+                localStorage.id = res.data.id;
                 // window.sessionStorage.setItem("token", res.data.token);
                 // 跳转到首页
                 alert("登录成功");
-                    window.location.href = "/api/v1/index";
+                    window.location.href = "/api/v1/index?id=" + window.localStorage.id;
             }
             else{
                 alert(res.msg);
