@@ -71,3 +71,32 @@ func GetUserInformation(c *gin.Context) (user *models.DBUser, err error) {
 		return
 	}
 }
+
+func GetUserInformationById(userID int64) (user *models.DBUser, err error) {
+	// 先从redis中获取
+	user, err = redis.GetUserById(userID)
+	fmt.Println("redis中获取", user)
+
+	if errors.Is(err, redis.ErrorNotData) { // 缓存中没有数据
+		// 从mysql中获取
+		user, err = mysql.GetUserByUserIdOrAddress(userID)
+		if err != nil {
+			fmt.Println(err)
+			zap.L().Debug("get user failed", zap.Error(err))
+			return
+		}
+		// 写入redis
+		err = redis.SetUser(userID, user)
+		if err != nil {
+			zap.L().Debug("redis.SetUser failed", zap.Error(err))
+			return
+		}
+		return user, nil
+	} else if err != nil {
+		fmt.Println(err)
+		return
+	} else {
+		fmt.Printf("获取当前登陆用户信息 redis----------->%#v\n", user)
+		return
+	}
+}

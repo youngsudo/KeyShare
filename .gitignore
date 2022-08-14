@@ -5,3 +5,4 @@ tmpl/
 .vscode/
 .idea/
 tmp/
+account_*.sol

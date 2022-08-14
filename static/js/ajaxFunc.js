@@ -1,4 +1,3 @@
-
 // ajax 请求 无参数
 function ajaxRequest(url,type,success){
     $.ajax({

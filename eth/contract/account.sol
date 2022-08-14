@@ -74,20 +74,15 @@ function changeClass(string memory _oldClass,string memory _newClass) public {
     // 如果分类下有Key,则必须修改分类下的 key
     if (keyListMap[msg.sender][_oldClass].length > 0) {
         for (uint i = 0; i < keyListMap[msg.sender][_oldClass].length; i++) {
-            KeyStruct memory key = keyListMap[msg.sender][_oldClass][i];
-            keyListMap[msg.sender][_newClass].push(KeyStruct({
-                id: key.id,
-                owner: key.owner,
-                borrower: key.borrower,
-                key:key.key,
-                password:key.password,
-                accountClass: _newClass,
-                keyType: key.keyType,
-                isBorrow: key.isBorrow,
-                time:block.timestamp
-            }));
-            keyIndexMap[msg.sender]["default"][key.key] = keyListMap[msg.sender]["default"].length;
+            uint256 id = keyListMap[msg.sender][_oldClass][i];
+            KeyStruct memory key = idKeyMap[id];
+            keyListMap[msg.sender][_newClass].push(id);           
+            keyIndexMap[msg.sender][_newClass][key.key] = keyListMap[msg.sender][_newClass].length;
+            keyIdMap[msg.sender][_newClass][key.key] = id;
+            // 修改key,
+            idKeyMap[id].accountClass = _newClass;
         }
+        // 删除整个数组
         delete keyListMap[msg.sender][_oldClass];
     }
 
@@ -120,19 +115,13 @@ function deleteAccountClassFunc(string memory _accountClass) public {
      // 如果分类下有Key,则必须将分类下的 key 移动到 default
     if (keyListMap[msg.sender][_accountClass].length > 0) {
         for (uint i = 0; i < keyListMap[msg.sender][_accountClass].length; i++) {
-                KeyStruct memory key = keyListMap[msg.sender][_accountClass][i];
-                keyListMap[msg.sender]["default"].push(KeyStruct({
-                    id: key.id,
-                    owner: key.owner,
-                    borrower: key.borrower,
-                    key:key.key,
-                    password:key.password,
-                    accountClass: "default",
-                    keyType: key.keyType,
-                    isBorrow: key.isBorrow,
-                    time: block.timestamp
-                }));
-                keyIndexMap[msg.sender]["default"][key.key] = keyListMap[msg.sender]["default"].length;
+                uint256 id = keyListMap[msg.sender][_accountClass][i];
+
+                idKeyMap[id].accountClass = "default"; // 修改分类
+                idKeyMap[id].time = block.timestamp;    // 修改时间戳
+
+                keyListMap[msg.sender]["default"].push(id);
+                keyIndexMap[msg.sender]["default"][idKeyMap[id].key] = keyListMap[msg.sender]["default"].length;
             }
         delete keyListMap[msg.sender][_accountClass];
     }
@@ -158,54 +147,58 @@ struct KeyStruct{ // 保存的账号和密码
     bool isBorrow;  // 是否已借出
     uint256 time;
 }
-// 通过地址和分类名 获取Key数组
-mapping (address => mapping(string => KeyStruct[])) public keyListMap;
-// 地址 分类名 账号列表(Key) 账号索引
+// id 确定 key,同时也可以使用 id 获取 key
+mapping(uint256 => KeyStruct) public idKeyMap;
+// 通过地址和分类名 获取 idKey 数组,进而通过idKey数组获取key
+mapping (address => mapping(string => uint256[])) public keyListMap;
+// 地址 分类名 账号列表(Key) 账号索引 index
 mapping(address => mapping(string => mapping(string => uint256))) public keyIndexMap; 
+// 地址 分类名 账号列表(Key) 账号id
+mapping(address => mapping(string => mapping(string => uint256))) public keyIdMap; 
 
-// 钥匙公开的集合
-uint256[] public publicKeyList; // uint256 index => uint256 id
-// 生成一个 id 来定位 key   id => KeyStruct
-mapping(uint256 => KeyStruct) public publicKeyMap;
-
-// 用户公开钥匙
-function addPublicKey(KeyStruct memory _keystruct) public view returns (KeyStruct memory){
-    return _keystruct;
+// 判断 id 是否已经存在
+function isKeyIDFunc(uint256 _id) public view returns(bool){
+    // (id = 0 且) id != KeyStruct.id
+    return idKeyMap[_id].id == _id;
 }
 
-// 添加账号 不要索引
+// 添加账号 不要索引(生成一个大id)
 function addKeyFunc(uint256 _id,string memory _accountClass,string memory _key,string memory _pass) public {
-    require(isAccountClassFunc(_accountClass), "Account type does not exist!");
-
+    require(!isKeyIDFunc(_id), "ID is already exists!");
+    require(isAccountClassFunc(_accountClass), "Account Class does not exist!");
     // 判断是否已经存在该分类下的 key
-    require(!isKeyFunc(_accountClass,_key), "Account Key already exists!");
+    require(isKeyFunc(_accountClass,_key), "Account Key does not exists!");
 
-    // 添加账号
-    keyListMap[msg.sender][_accountClass].push(KeyStruct({
+    // 使用一个 id 对应 一个 key
+    idKeyMap[_id] = KeyStruct({
         id: _id,
         owner:msg.sender,
-        borrower:address(0),
+        borrower:address(0),   
         key:_key,
         password:_pass,
         accountClass: _accountClass,
         keyType: KeyType.privateKey,    // 默认是私密钥匙
         isBorrow:false,
         time: block.timestamp
-    }));
-    // 添加分类下Key索引,不要索引,使用第几个
+    });
+    // 添加账号
+    keyListMap[msg.sender][_accountClass].push(_id);
+
+     // 添加分类下Key索引,不要索引,使用第几个
     keyIndexMap[msg.sender][_accountClass][_key] = keyListMap[msg.sender][_accountClass].length; // 不要索引!!!!!!
+    keyIdMap[msg.sender][_accountClass][_key] = _id; 
 
     emit addKeyEvent(msg.sender,_accountClass,_key,block.timestamp);
 }
 
 // 判断账号(Key)是否存在
 function isKeyFunc(string memory _accountClass,string memory _key) public view returns(bool){
-    uint256 index = keyIndexMap[msg.sender][_accountClass][_key];   // 获取该Key的位置而不是索引
-    return index != 0;  // 个数绝对不会为0,因为添加时已经判断了
+    uint256 id = keyIndexMap[msg.sender][_accountClass][_key];   // 获取该Key的索引
+    return idKeyMap[id].id == id;  
 }
 
-// 返回一个分类下的所有Key(数组)
-function returnClassAll(string memory _accountClass) public view returns (KeyStruct[] memory){
+// 返回一个分类下的所有Key(数组id)
+function returnClassKeyIdAll(string memory _accountClass) public view returns (uint256[] memory){
     return keyListMap[msg.sender][_accountClass];
 }
 
@@ -225,7 +218,9 @@ function deleteKeyFunc(string memory _accountClass,string memory _key) public {
 function updateKeyFunc(string memory _accountClass,string memory _key,string memory _pass) public {
     require(isAccountClassFunc(_accountClass), "Account type does not exist!");
     require(isKeyFunc(_accountClass,_key), "Account key does not exist!");
-    keyListMap[msg.sender][_accountClass][keyIndexMap[msg.sender][_accountClass][_key]].password = _pass;
+    // keyListMap[msg.sender][_accountClass][keyIndexMap[msg.sender][_accountClass][_key]].password = _pass;
+    uint256 id = keyIdMap[msg.sender][_accountClass][_key];
+    idKeyMap[id].password = _pass;
 
     emit modifyKeyEvent(msg.sender,_accountClass,_key);
 }
@@ -234,22 +229,24 @@ function updateKeyFunc(string memory _accountClass,string memory _key,string mem
 function moveFunc(string memory _oldClass,string memory _newClass,string memory _key) public {
     require(isAccountClassFunc(_oldClass), "Account type does not exist!");
     require(isAccountClassFunc(_newClass), "Account type does not exist!");
-            uint256 index = keyIndexMap[msg.sender][_oldClass][_key];
-            KeyStruct memory key = keyListMap[msg.sender][_oldClass][index - 1];
-            keyListMap[msg.sender][_newClass].push(KeyStruct({
-                id: key.id,
-                owner: key.owner,
-                borrower: key.borrower,
-                key:key.key,
-                password:key.password,
-                accountClass:_newClass,
-                keyType: key.keyType,
-                isBorrow: key.isBorrow,
-                time:block.timestamp
-            }));
+    require(isKeyFunc(_oldClass,_key), "Account Key does not exists!");
 
-        keyIndexMap[msg.sender][_newClass][key.key] = keyListMap[msg.sender][_newClass].length;
-        delete keyListMap[msg.sender][_oldClass][index - 1 ];
+    uint256 id = keyIdMap[msg.sender][_oldClass][_key]; 
+    // 修改key的分类
+    idKeyMap[id].accountClass = _newClass;
+    // 添加到新分类
+    keyListMap[msg.sender][_newClass].push(id);
+    // 新分类数组长度 +1
+    keyIndexMap[msg.sender][_newClass][idKeyMap[id].key] = keyListMap[msg.sender][_newClass].length;
+    
+    // 删除原分类中的key
+    // delete keyListMap[msg.sender][_oldClass][index - 1 ];
+    uint256 index = keyIndexMap[msg.sender][_oldClass][_key]; 
+    uint len = keyListMap[msg.sender][_oldClass].length; 
+    // keyListMap中最后一个key id 替代该key id.
+    keyListMap[msg.sender][_oldClass][index - 1 ] = keyListMap[msg.sender][_oldClass][len - 1 ];
+    delete keyListMap[msg.sender][_oldClass][len - 1 ];
+
     emit moveKeyEvent(msg.sender,_oldClass,_newClass,_key);
 }
 }

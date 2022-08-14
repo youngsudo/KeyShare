@@ -9,6 +9,16 @@ import (
 
 // 首页
 func GetIndexHandler(c *gin.Context) {
+	// id, err := strconv.Atoi(c.Query("id"))
+	// if err != nil {
+	// 	zap.L().Debug("url无参数", zap.Error(err))
+	// }
+
+	// user, err := GetUserInformationById(int64(id))
+	// if err != nil {
+	// 	zap.Error(err)
+	// }
+	// fmt.Println(user)
 	c.HTML(http.StatusOK, "index.html", gin.H{})
 }
 
