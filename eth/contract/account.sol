@@ -53,7 +53,7 @@ function isAccountClassFunc(string memory _accountClass) internal view returns(b
 }
 
 // 返回所有分类(数组)
-function returnClassAll() public view returns (string[] memory){
+function returnClassAllFunc() public view returns (string[] memory){
     return accountClassListMap[msg.sender];
 }
 
@@ -145,6 +145,7 @@ struct KeyStruct{ // 保存的账号和密码
     string accountClass;   // 分类名
     KeyType keyType;
     bool isBorrow;  // 是否已借出
+    uint256 ethPledge;  // 押金
     uint256 time;
 }
 // id 确定 key,同时也可以使用 id 获取 key
@@ -163,11 +164,11 @@ function isKeyIDFunc(uint256 _id) public view returns(bool){
 }
 
 // 添加账号 不要索引(生成一个大id)
-function addKeyFunc(uint256 _id,string memory _accountClass,string memory _key,string memory _pass) public {
+function addKeyFunc(uint256 _id,string memory _accountClass,string memory _key,string memory _pass,uint256 _ethPledge) public {
     require(!isKeyIDFunc(_id), "ID is already exists!");
     require(isAccountClassFunc(_accountClass), "Account Class does not exist!");
     // 判断是否已经存在该分类下的 key
-    require(isKeyFunc(_accountClass,_key), "Account Key does not exists!");
+    require(!isKeyFunc(_accountClass,_key), "Account Key does exists!");
 
     // 使用一个 id 对应 一个 key
     idKeyMap[_id] = KeyStruct({
@@ -179,6 +180,7 @@ function addKeyFunc(uint256 _id,string memory _accountClass,string memory _key,s
         accountClass: _accountClass,
         keyType: KeyType.privateKey,    // 默认是私密钥匙
         isBorrow:false,
+        ethPledge: _ethPledge,
         time: block.timestamp
     });
     // 添加账号
@@ -193,12 +195,12 @@ function addKeyFunc(uint256 _id,string memory _accountClass,string memory _key,s
 
 // 判断账号(Key)是否存在
 function isKeyFunc(string memory _accountClass,string memory _key) public view returns(bool){
-    uint256 id = keyIndexMap[msg.sender][_accountClass][_key];   // 获取该Key的索引
-    return idKeyMap[id].id == id;  
+    uint256 id = keyIdMap[msg.sender][_accountClass][_key];   // 获取该Key的id
+    return idKeyMap[id].id == id && id != 0;  
 }
 
 // 返回一个分类下的所有Key(数组id)
-function returnClassKeyIdAll(string memory _accountClass) public view returns (uint256[] memory){
+function returnClassKeyIdAllFunc(string memory _accountClass) public view returns (uint256[] memory){
     return keyListMap[msg.sender][_accountClass];
 }
 
@@ -208,8 +210,10 @@ function deleteKeyFunc(string memory _accountClass,string memory _key) public {
     require(isKeyFunc(_accountClass,_key), "Account key does not exist!");
    
     uint256 index = keyIndexMap[msg.sender][_accountClass][_key];   // 获取该Key的位置而不是索引
+    delete idKeyMap[keyIdMap[msg.sender][_accountClass][_key]];
     delete keyListMap[msg.sender][_accountClass][index - 1 ]; 
     delete keyIndexMap[msg.sender][_accountClass][_key];
+    delete keyIdMap[msg.sender][_accountClass][_key];
 
     emit deleteKeyEvent(msg.sender,_accountClass,_key);
 }
@@ -249,4 +253,94 @@ function moveFunc(string memory _oldClass,string memory _newClass,string memory 
 
     emit moveKeyEvent(msg.sender,_oldClass,_newClass,_key);
 }
+
+event setKeyByIdEvent(uint256,KeyType);
+
+// key所有者将自己的key 公开publicKey 1, privateKey 0.
+function setKeyByIdFunc(uint256 _id) public returns (KeyType) {
+    // 钥匙必须存在
+    require(isKeyIDFunc(_id),"key ID does not exists!");
+    // 钥匙必须属于本人
+    require(idKeyMap[_id].owner == msg.sender,"You are not the owner of the key");
+    // 钥匙必须未被借出
+    require(!idKeyMap[_id].isBorrow,"The key must not be lent");
+
+    // 改变状态 private 或 public
+    if (idKeyMap[_id].keyType == KeyType.privateKey) {  // 当前为私钥
+        idKeyMap[_id].keyType = KeyType.publicKey;  
+        emit setKeyByIdEvent(_id, KeyType.publicKey);
+        return KeyType.publicKey;
+    }else{  // 当前为公开
+        idKeyMap[_id].keyType = KeyType.privateKey;
+        emit setKeyByIdEvent(_id, KeyType.privateKey);
+        return  KeyType.privateKey;
+    }
+}
+// 借入钥匙事件
+event borrowKeyEvent(uint256 indexd,uint256,uint256);
+// 归还钥匙事件
+event doKeyReturnEvent(uint256 indexd,uint256,uint256);
+
+// 借入钥匙
+function borrowKeyByIdFunc(uint256 _id) public payable{
+    // 钥匙必须存在
+    require(isKeyIDFunc(_id),"key ID does not exists!");
+    // 钥匙必须不属于本人
+    require(idKeyMap[_id].owner != msg.sender,"You are the owner of the key,ok?");
+    // 钥匙必须未被借出
+    require(!idKeyMap[_id].isBorrow,"The key must not be lent");
+
+    // msg.value 发送的金额(押金)必须小于等于账户余额
+    require(msg.value <= getBalance(msg.sender),"The amount sent must be less than the account balance");
+
+    // 押金必须大于或等于 ethPledge
+    require(msg.value >= idKeyMap[_id].ethPledge,"The amount sent must be more than the ethPledge");
+
+    idKeyMap[_id].borrower = msg.sender;
+    idKeyMap[_id].isBorrow = true;
+    idKeyMap[_id].ethPledge = msg.value;    // 押金(ethPledge)
+    emit borrowKeyEvent(_id,msg.value,block.timestamp);
+}
+
+// 他人归还钥匙
+function doKeyReturnByIdFunc(uint256 _id) public {
+    // 钥匙必须存在
+    require(isKeyIDFunc(_id),"key ID does not exists!");
+    // 钥匙必须属于本人
+    require(idKeyMap[_id].owner == msg.sender,"You are not the owner of the key,ok?");
+    // 钥匙已经借出
+    require(idKeyMap[_id].isBorrow,"The key must lent");
+
+    // 将押金返还给借用人
+    payable(msg.sender).transfer(idKeyMap[_id].ethPledge);
+    
+    // 借出人设为空
+    idKeyMap[_id].borrower = address(0);
+    // 钥匙借出状态为 false (未借出)
+    idKeyMap[_id].isBorrow = false;
+
+    emit doKeyReturnEvent(_id,idKeyMap[_id].ethPledge,block.timestamp);
+}
+// 查账户余额
+function getBalance(address addr) public view returns(uint){
+    return addr.balance;
+}
+// 查合约余额
+function getCurrentBalance() public view returns(uint){
+    return address(this).balance;
+}
+
+    // 押金(充值到合约)
+    mapping(address => uint256) public amount;
+    
+    event depositEvent(address,uint256,uint256);
+    // 充值
+    function deposit() public payable{
+        require(msg.value <=  getBalance(msg.sender),"sender doesn't have enough funds to send tx. ");
+        amount[msg.sender] += msg.value;
+    
+        emit depositEvent(msg.sender,msg.value,block.timestamp);
+    }
+    // 提现
+    // payable(msg.sender).transfer(_amount);
 }
