@@ -257,24 +257,19 @@ function moveFunc(string memory _oldClass,string memory _newClass,string memory 
 event setKeyByIdEvent(uint256,KeyType);
 
 // key所有者将自己的key 公开publicKey 1, privateKey 0.
-function setKeyByIdFunc(uint256 _id) public returns (KeyType) {
+function setKeyByIdFunc(uint256 _id) public returns (uint8) {
     // 钥匙必须存在
     require(isKeyIDFunc(_id),"key ID does not exists!");
     // 钥匙必须属于本人
     require(idKeyMap[_id].owner == msg.sender,"You are not the owner of the key");
     // 钥匙必须未被借出
     require(!idKeyMap[_id].isBorrow,"The key must not be lent");
-
-    // 改变状态 private 或 public
-    if (idKeyMap[_id].keyType == KeyType.privateKey) {  // 当前为私钥
-        idKeyMap[_id].keyType = KeyType.publicKey;  
-        emit setKeyByIdEvent(_id, KeyType.publicKey);
-        return KeyType.publicKey;
-    }else{  // 当前为公开
-        idKeyMap[_id].keyType = KeyType.privateKey;
-        emit setKeyByIdEvent(_id, KeyType.privateKey);
-        return  KeyType.privateKey;
-    }
+    // 1 - 0 = 1;
+    // 1 - 1 = 0;
+    uint8 i = uint8(KeyType.publicKey) - uint8(idKeyMap[_id].keyType);
+    idKeyMap[_id].keyType = KeyType(i);
+    emit setKeyByIdEvent(_id,KeyType(i));
+    return i; 
 }
 // 借入钥匙事件
 event borrowKeyEvent(uint256 indexd,uint256,uint256);
