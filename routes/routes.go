@@ -19,7 +19,7 @@ func Setup(mode string) *gin.Engine {
 	r.LoadHTMLGlob("templates/*")
 
 	// 路由组
-	app := r.Group("/api/v1") // 不需要鉴权的路由
+	app := r.Group("/api/v1")
 	{
 		app.GET("/login", controllers.GetLoginHandler)
 		app.GET("/register", controllers.GetRegisterHandler)

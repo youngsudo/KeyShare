@@ -17,6 +17,7 @@ import (
 
 var (
 	KeyShare *contract.KeyShare
+	Account  *contract.Account
 	client   *ethclient.Client
 )
 
@@ -38,12 +39,17 @@ func Init(cfg *setting.ETHConfig) error {
 		zap.L().Warn("合约地址不是合约地址", zap.String("contract", cfg.Contract))
 		return ErrorIsNotContract
 	}
-	ins, err := contract.NewKeyShare(common.HexToAddress(cfg.Contract), client)
+	// ins, err := contract.NewKeyShare(common.HexToAddress(cfg.Contract), client)
+	// if err != nil {
+	// 	return ErrorKeyStore
+	// }
+	ins, err := contract.NewAccount(common.HexToAddress(cfg.Contract), client)
 	if err != nil {
 		return ErrorKeyStore
 	}
 	// fmt.Println(ins)
-	KeyShare = ins
+	// KeyShare = ins
+	Account = ins
 	return nil
 }
 

@@ -23,10 +23,15 @@ event addKeyEvent(address indexed userAddr,string accountClass,string key,uint25
 // 删除账号(Key)事件
 event deleteKeyEvent(address indexed userAddr,string accountClass,string key);
 // 修改账号(Key)事件
-event modifyKeyEvent(address indexed userAddr,string accountClass,string key);
+event modifyKeyEvent(address indexed userAddr,uint256 indexed id);
 // 移动账号(Key)事件
 event moveKeyEvent(address indexed userAddr,string accountClass,string key,string oldAccountClass);
-
+// 设置钥匙公开或私用以及押金
+event setKeyByIdEvent(uint256,KeyType,uint256);
+// 借入钥匙事件
+event borrowKeyEvent(uint256 indexd,uint256,uint256);
+// 归还钥匙事件
+event doKeyReturnEvent(uint256 indexd,uint256,uint256);
 // 添加分类
 function addAccountClassFunc(string memory _accountClass) public  {
     // 判断是否已经存在该分类
@@ -164,7 +169,7 @@ function isKeyIDFunc(uint256 _id) public view returns(bool){
 }
 
 // 添加账号 不要索引(生成一个大id)
-function addKeyFunc(uint256 _id,string memory _accountClass,string memory _key,string memory _pass,uint256 _ethPledge) public {
+function addKeyFunc(uint256 _id,string memory _accountClass,string memory _key,string memory _pass) public {
     require(!isKeyIDFunc(_id), "ID is already exists!");
     require(isAccountClassFunc(_accountClass), "Account Class does not exist!");
     // 判断是否已经存在该分类下的 key
@@ -180,7 +185,7 @@ function addKeyFunc(uint256 _id,string memory _accountClass,string memory _key,s
         accountClass: _accountClass,
         keyType: KeyType.privateKey,    // 默认是私密钥匙
         isBorrow:false,
-        ethPledge: _ethPledge,
+        ethPledge: 0,
         time: block.timestamp
     });
     // 添加账号
@@ -217,6 +222,19 @@ function deleteKeyFunc(string memory _accountClass,string memory _key) public {
 
     emit deleteKeyEvent(msg.sender,_accountClass,_key);
 }
+function deleteKeyByIdFunc(uint256 _id) public {
+    require(isKeyIDFunc(_id), "Account ID does not exist!");
+    KeyStruct memory key = idKeyMap[_id];
+    string memory _accountClass = key.accountClass;
+    string memory _key = key.key;
+    uint256 index = keyIndexMap[msg.sender][_accountClass][_key];   // 获取该Key的位置而不是索引
+    delete idKeyMap[keyIdMap[msg.sender][_accountClass][_key]];
+    delete keyListMap[msg.sender][_accountClass][index - 1 ]; 
+    delete keyIndexMap[msg.sender][_accountClass][_key];
+    delete keyIdMap[msg.sender][_accountClass][_key];
+
+    emit deleteKeyEvent(msg.sender,_accountClass,_key);
+}
 
 // 修改Key的密码
 function updateKeyFunc(string memory _accountClass,string memory _key,string memory _pass) public {
@@ -226,7 +244,13 @@ function updateKeyFunc(string memory _accountClass,string memory _key,string mem
     uint256 id = keyIdMap[msg.sender][_accountClass][_key];
     idKeyMap[id].password = _pass;
 
-    emit modifyKeyEvent(msg.sender,_accountClass,_key);
+    emit modifyKeyEvent(msg.sender,id);
+}
+function updateKeyByIdFunc(uint256 _id,string memory _pass) public {
+    require(isKeyIDFunc(_id), "Account ID does not exist!");
+    idKeyMap[_id].password = _pass;
+
+    emit modifyKeyEvent(msg.sender,_id);
 }
 
 // 移动某个 Key 到其他分类
@@ -254,10 +278,8 @@ function moveFunc(string memory _oldClass,string memory _newClass,string memory 
     emit moveKeyEvent(msg.sender,_oldClass,_newClass,_key);
 }
 
-event setKeyByIdEvent(uint256,KeyType);
-
 // key所有者将自己的key 公开publicKey 1, privateKey 0.
-function setKeyByIdFunc(uint256 _id) public returns (uint8) {
+function setKeyByIdFunc(uint256 _id,uint256 _ethPledge) public returns (uint8) {
     // 钥匙必须存在
     require(isKeyIDFunc(_id),"key ID does not exists!");
     // 钥匙必须属于本人
@@ -268,13 +290,10 @@ function setKeyByIdFunc(uint256 _id) public returns (uint8) {
     // 1 - 1 = 0;
     uint8 i = uint8(KeyType.publicKey) - uint8(idKeyMap[_id].keyType);
     idKeyMap[_id].keyType = KeyType(i);
-    emit setKeyByIdEvent(_id,KeyType(i));
+    idKeyMap[_id].ethPledge = _ethPledge;
+    emit setKeyByIdEvent(_id,KeyType(i),_ethPledge);
     return i; 
 }
-// 借入钥匙事件
-event borrowKeyEvent(uint256 indexd,uint256,uint256);
-// 归还钥匙事件
-event doKeyReturnEvent(uint256 indexd,uint256,uint256);
 
 // 借入钥匙
 function borrowKeyByIdFunc(uint256 _id) public payable{
